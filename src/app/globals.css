@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* =====================================================================
-   Charte Graphique UP Gabon — Direction Artistique Officielle
+   Charte Graphique UP Gabon — Direction Artistique & Mobile Web App
    ===================================================================== */
 :root {
   --up-background: #0B0B0D;
@@ -15,7 +15,7 @@
   --up-success: #22C55E;
   --up-danger: #EF4444;
 
-  /* Safe areas mobile */
+  /* Safe areas mobile PWA */
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
 }
@@ -90,4 +90,21 @@
   ::-webkit-scrollbar-thumb:hover {
     background: #D4AF37;
   }
+}
+
+/* Utilitaires spécifiques ILLUSTRATION2.webp */
+.glass-pill {
+  background: rgba(11, 11, 13, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.floating-action-btn {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(212, 175, 55, 0.2);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-action-btn:active {
+  transform: scale(0.92);
 }

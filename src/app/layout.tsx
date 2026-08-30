@@ -12,29 +12,50 @@ const inter = Inter({
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-playfair",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "UP — Conciergerie privée & accompagnement social",
+  title: "UP Gabon — Conciergerie Privée & Accompagnement d'Élite",
   description:
-    "La conciergerie privée premium et l'accompagnement social, partout au Gabon.",
-  applicationName: "UP",
+    "Plateforme officielle d'accompagnement social encadré, protocolaire et d'assistance de conciergerie privée au Gabon.",
+  applicationName: "UP Gabon",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "UP Gabon",
+  },
+  formatDetection: {
+    telephone: true,
+  },
+  icons: {
+    icon: "/brand/up-logo.svg",
+    apple: "/brand/up-logo.jpeg",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0B0B0C",
+  themeColor: "#0B0B0D",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="fr" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="bg-up-black font-sans text-up-white antialiased">
+    <html lang="fr" className={`${inter.variable} ${playfair.variable} dark`}>
+      <head>
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      </head>
+      <body className="min-h-dvh bg-[#0B0B0D] font-sans text-[#FAFAF9] antialiased select-none selection:bg-[#D4AF37]/30 selection:text-[#FAFAF9]">
         <NetworkStatusBanner />
-        {/* Coquille mobile-first : largeur contrainte, centrée sur grand écran */}
-        <div className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col bg-up-black">
+        <div className="min-h-dvh flex flex-col w-full bg-[#0B0B0D]">
           {children}
         </div>
       </body>

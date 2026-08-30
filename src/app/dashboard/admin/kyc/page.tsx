@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import {
   AlertCircle,
@@ -31,489 +31,440 @@ import {
   X,
   XCircle,
 } from "lucide-react";
-import { useUpStore } from "@/lib/store";
-import { useHydrated } from "@/lib/use-hydrated";
-import type { KycApplicant } from "@/lib/admin-data";
+import { createClient } from "@/lib/supabase/client";
 
-type FilterStatus = "all" | "pending" | "approved" | "rejected";
+interface RealKycApplicant {
+  id: string;
+  fullName: string;
+  role: string;
+  phoneNumber: string;
+  avatarUrl: string;
+  idCardUrl?: string;
+  zone: string;
+  bio: string;
+  hourlyRateXaf: number;
+  eveningRateXaf: number;
+  services: string[];
+  languages: string[];
+  education: string;
+  submittedAt: string;
+  status: "pending" | "verified" | "rejected";
+}
 
 export default function AdminKycModerationPage() {
-  const hydrated = useHydrated();
-
-  const kycApplicants = useUpStore((s) => s.kycApplicants);
-  const approveKycApplicant = useUpStore((s) => s.approveKycApplicant);
-  const rejectKycApplicant = useUpStore((s) => s.rejectKycApplicant);
-
-  const [filterStatus, setFilterStatus] = useState<FilterStatus>("pending");
+  const [applicants, setApplicants] = useState<RealKycApplicant[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "verified" | "rejected">("pending");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedApplicant, setSelectedApplicant] = useState<KycApplicant | null>(
-    kycApplicants.find((a) => a.status === "pending") || kycApplicants[0] || null,
-  );
+  const [selectedApplicant, setSelectedApplicant] = useState<RealKycApplicant | null>(null);
 
   // Modal de rejet avec motif
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState(
-    "Document CNI/Passeport illisible ou reflets masquant les informations",
+    "Document CNI/Passeport illisible ou informations non conformes",
   );
-  const [customRejectionNote, setCustomRejectionNote] = useState("");
-
-  // Toast confirmation
   const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
 
-  const filteredApplicants = kycApplicants.filter((app) => {
+  const loadApplicants = async () => {
+    setIsLoading(true);
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("profiles")
+        .select(`
+          id,
+          full_name,
+          role,
+          phone,
+          avatar_url,
+          id_card_url,
+          kyc_status,
+          created_at,
+          companion_details (
+            bio,
+            education_level,
+            languages,
+            services_offered,
+            hourly_rate_xaf,
+            evening_rate_xaf,
+            zone_preference
+          )
+        `);
+
+      if (!error && data) {
+        const mapped: RealKycApplicant[] = data.map((p: any) => {
+          const details = Array.isArray(p.companion_details)
+            ? p.companion_details[0]
+            : p.companion_details;
+
+          return {
+            id: p.id,
+            fullName: p.full_name || "Candidat Sans Nom",
+            role: p.role || "companion",
+            phoneNumber: p.phone || "Non renseigné",
+            avatarUrl:
+              p.avatar_url ||
+              "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop",
+            idCardUrl: p.id_card_url,
+            zone: details?.zone_preference || "Libreville",
+            bio: details?.bio || "Aucune biographie fournie.",
+            hourlyRateXaf: details?.hourly_rate_xaf || 25000,
+            eveningRateXaf: details?.evening_rate_xaf || 75000,
+            services: details?.services_offered || ["diner_affaires"],
+            languages: details?.languages || ["Français"],
+            education: details?.education_level || "Non renseigné",
+            submittedAt: p.created_at
+              ? new Date(p.created_at).toLocaleDateString("fr-FR", {
+                  day: "numeric",
+                  month: "short",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "Récemment",
+            status: (p.kyc_status as any) || "pending",
+          };
+        });
+
+        setApplicants(mapped);
+        if (!selectedApplicant && mapped.length > 0) {
+          const firstPending = mapped.find((a) => a.status === "pending") || mapped[0];
+          setSelectedApplicant(firstPending);
+        }
+      }
+    } catch (err) {
+      console.error("Error loading KYC applicants:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadApplicants();
+  }, []);
+
+  const handleApprove = async (applicant: RealKycApplicant) => {
+    try {
+      const supabase = createClient();
+      await supabase
+        .from("profiles")
+        .update({ kyc_status: "verified" })
+        .eq("id", applicant.id);
+
+      setActionSuccessMsg(
+        `Candidature de ${applicant.fullName} approuvée. Le profil est désormais certifié et visible !`,
+      );
+      loadApplicants();
+      setTimeout(() => setActionSuccessMsg(null), 4000);
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleConfirmReject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedApplicant) return;
+
+    try {
+      const supabase = createClient();
+      await supabase
+        .from("profiles")
+        .update({ kyc_status: "rejected" })
+        .eq("id", selectedApplicant.id);
+
+      setIsRejectModalOpen(false);
+      setActionSuccessMsg(`Candidature de ${selectedApplicant.fullName} rejetée.`);
+      loadApplicants();
+      setTimeout(() => setActionSuccessMsg(null), 4000);
+    } catch {
+      // ignore
+    }
+  };
+
+  const filteredApplicants = applicants.filter((app) => {
     const matchesStatus =
       filterStatus === "all" ? true : app.status === filterStatus;
     const matchesSearch =
       app.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.nationalIdNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.zone.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesStatus && matchesSearch;
   });
 
-  const handleApprove = (applicant: KycApplicant) => {
-    approveKycApplicant(applicant.id);
-    setActionSuccessMsg(
-      `Profil de ${applicant.fullName} validé avec succès. Badge "Identité Vérifiée" attribué.`,
-    );
-    setTimeout(() => setActionSuccessMsg(null), 4000);
-  };
-
-  const handleConfirmReject = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedApplicant) return;
-
-    const fullReason = customRejectionNote
-      ? `${rejectionReason} — ${customRejectionNote}`
-      : rejectionReason;
-
-    rejectKycApplicant(selectedApplicant.id, fullReason);
-    setIsRejectModalOpen(false);
-    setCustomRejectionNote("");
-    setActionSuccessMsg(`Candidature de ${selectedApplicant.fullName} rejetée.`);
-    setTimeout(() => setActionSuccessMsg(null), 4000);
-  };
-
   return (
-    <main className="px-5 pt-4 space-y-4">
+    <main className="px-4 sm:px-6 pt-4 pb-12 space-y-4 max-w-7xl mx-auto">
       {/* En-tête de la page */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-white/10 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-white/10 pb-4">
         <div>
-          <span className="text-[10px] uppercase font-bold tracking-widest text-up-gold">
+          <span className="text-[10px] uppercase font-bold tracking-widest text-[#D4AF37]">
             Conformité &amp; Sécurité UP Gabon
           </span>
-          <h1 className="font-display text-2xl font-bold text-up-white">
+          <h1 className="font-display text-2xl font-bold text-[#FAFAF9] sm:text-3xl">
             Modération des Identités (KYC)
           </h1>
-          <p className="text-xs text-up-gray">
-            Contrôle strict des pièces d&apos;identité gabonaises et vérification de la concordance faciale.
+          <p className="text-xs text-[#A1A1AA]">
+            Contrôle des pièces d&apos;identité gabonaises et agrément des comptes réels.
           </p>
         </div>
 
-        {/* Compteur de dossiers en attente */}
         <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-1 text-xs font-bold text-amber-300">
+          <button
+            type="button"
+            onClick={loadApplicants}
+            className="flex items-center gap-1.5 rounded-full border border-white/10 bg-[#151518] px-3.5 py-1.5 text-xs font-semibold text-[#A1A1AA] hover:text-[#FAFAF9]"
+          >
+            <RefreshCw size={13} className={isLoading ? "animate-spin" : ""} />
+            <span>Actualiser</span>
+          </button>
+          <span className="flex items-center gap-1.5 rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/15 px-3 py-1.5 text-xs font-bold text-[#D4AF37]">
             <Clock size={13} />
             <span>
-              {kycApplicants.filter((a) => a.status === "pending").length} en attente
+              {applicants.filter((a) => a.status === "pending").length} en attente
             </span>
           </span>
         </div>
       </div>
 
-      {/* Message de succès Toast */}
+      {/* Message de succès */}
       {actionSuccessMsg && (
-        <div className="rounded-2xl border border-emerald-500/40 bg-emerald-950/40 p-3.5 text-xs text-emerald-300 flex items-center justify-between shadow-xl animate-in fade-in">
-          <div className="flex items-center gap-2 font-medium">
-            <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
-            <span>{actionSuccessMsg}</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setActionSuccessMsg(null)}
-            className="text-emerald-400/80 hover:text-emerald-300"
-          >
-            <X size={15} />
-          </button>
+        <div className="flex items-center gap-2.5 rounded-2xl border border-[#22C55E]/40 bg-[#22C55E]/10 p-4 text-xs text-[#22C55E] animate-in fade-in">
+          <CheckCircle2 size={18} className="shrink-0" />
+          <span>{actionSuccessMsg}</span>
         </div>
       )}
 
-      {/* Filtres et Barre de recherche */}
-      <div className="flex flex-col sm:flex-row gap-2.5">
+      {/* Barre de Recherche & Filtres */}
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search
-            size={15}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-up-gray"
+            size={16}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A1A1AA]"
           />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Rechercher par nom, n° CNI/Passeport, quartier..."
-            className="w-full rounded-2xl border border-white/10 bg-up-surface py-2.5 pl-10 pr-4 text-xs text-up-white placeholder-up-gray focus:border-up-gold focus:outline-none"
+            placeholder="Rechercher un candidat par nom, quartier..."
+            className="w-full rounded-2xl border border-white/10 bg-[#151518] py-2.5 pl-10 pr-4 text-xs text-[#FAFAF9] focus:border-[#D4AF37] focus:outline-none"
           />
         </div>
 
-        {/* Boutons de filtrage par statut */}
-        <div className="flex rounded-2xl border border-white/10 bg-up-surface p-1">
-          {[
-            { id: "pending", label: "En attente" },
-            { id: "approved", label: "Validés" },
-            { id: "rejected", label: "Rejetés" },
-            { id: "all", label: "Tous" },
-          ].map((tab) => (
+        <div className="flex gap-1.5 rounded-full border border-white/10 bg-[#151518] p-1">
+          {(["pending", "verified", "rejected", "all"] as const).map((st) => (
             <button
-              key={tab.id}
+              key={st}
               type="button"
-              onClick={() => setFilterStatus(tab.id as FilterStatus)}
-              className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
-                filterStatus === tab.id
-                  ? "bg-up-gold text-up-black shadow"
-                  : "text-up-gray hover:text-up-white"
+              onClick={() => setFilterStatus(st)}
+              className={`rounded-full px-3.5 py-1 text-xs font-semibold transition ${
+                filterStatus === st
+                  ? "bg-[#D4AF37] text-[#0B0B0D]"
+                  : "text-[#A1A1AA] hover:text-[#FAFAF9]"
               }`}
             >
-              {tab.label}
+              {st === "pending"
+                ? "En attente"
+                : st === "verified"
+                ? "Validés"
+                : st === "rejected"
+                ? "Rejetés"
+                : "Tous"}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Grille principale : Liste des candidats (Gauche) + Visualiseur Côte à Côte (Droite) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Colonne Gauche : Liste des dossiers (4 colonnes) */}
-        <div className="lg:col-span-4 space-y-2.5 max-h-[700px] overflow-y-auto pr-1">
+      {/* Grille principale : Liste des candidats + Panneau de détail */}
+      <div className="grid gap-5 lg:grid-cols-12">
+        {/* Colonne de gauche : Liste des dossiers */}
+        <div className="lg:col-span-5 space-y-2.5 max-h-[680px] overflow-y-auto pr-1">
           {filteredApplicants.length > 0 ? (
-            filteredApplicants.map((app) => {
-              const isSelected = selectedApplicant?.id === app.id;
-              const isPending = app.status === "pending";
-              const isApproved = app.status === "approved";
-              const isRejected = app.status === "rejected";
-
+            filteredApplicants.map((applicant) => {
+              const isSelected = selectedApplicant?.id === applicant.id;
               return (
                 <div
-                  key={app.id}
-                  onClick={() => setSelectedApplicant(app)}
-                  className={`cursor-pointer rounded-2xl border p-3.5 transition-all ${
+                  key={applicant.id}
+                  onClick={() => setSelectedApplicant(applicant)}
+                  className={`cursor-pointer rounded-2xl border p-4 transition-all ${
                     isSelected
-                      ? "border-up-gold bg-gradient-to-r from-up-gold/15 to-up-surface shadow-lg"
-                      : "border-white/10 bg-up-surface hover:border-white/20"
+                      ? "border-[#D4AF37] bg-[#D4AF37]/10 shadow-[0_0_15px_rgba(212,175,55,0.15)]"
+                      : "border-white/10 bg-[#151518] hover:border-white/20"
                   }`}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="relative h-10 w-10 overflow-hidden rounded-xl border border-white/10 bg-up-black">
-                        <Image
-                          src={app.selfieThumbnailUrl}
-                          alt={app.fullName}
-                          fill
-                          className="object-cover object-top"
-                        />
-                      </div>
-                      <div>
-                        <h2 className="font-semibold text-xs text-up-white">
-                          {app.fullName}
-                        </h2>
-                        <p className="text-[11px] text-up-gray">
-                          {app.age} ans · {app.zone}
-                        </p>
-                      </div>
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-white/10 bg-[#0B0B0D]">
+                      <Image
+                        src={applicant.avatarUrl}
+                        alt={applicant.fullName}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
-
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase ${
-                        isPending
-                          ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
-                          : isApproved
-                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                            : "bg-red-500/20 text-red-300 border border-red-500/40"
-                      }`}
-                    >
-                      {isPending ? "En attente" : isApproved ? "Validé" : "Rejeté"}
-                    </span>
-                  </div>
-
-                  <div className="mt-2.5 flex items-center justify-between border-t border-white/5 pt-2 text-[10px] text-up-gray">
-                    <span className="font-mono">{app.nationalIdNumber}</span>
-                    <span>{app.submittedAt}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between">
+                        <p className="truncate text-xs font-bold text-[#FAFAF9]">
+                          {applicant.fullName}
+                        </p>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase ${
+                            applicant.status === "verified"
+                              ? "bg-[#22C55E]/15 text-[#22C55E]"
+                              : applicant.status === "rejected"
+                              ? "bg-[#EF4444]/15 text-[#EF4444]"
+                              : "bg-amber-500/15 text-amber-400"
+                          }`}
+                        >
+                          {applicant.status === "verified"
+                            ? "Vérifié"
+                            : applicant.status === "rejected"
+                            ? "Rejeté"
+                            : "En attente"}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#A1A1AA] flex items-center gap-1 mt-0.5">
+                        <MapPin size={11} className="text-[#D4AF37]" />
+                        <span>{applicant.zone}</span>
+                        <span>·</span>
+                        <span>{applicant.phoneNumber}</span>
+                      </p>
+                    </div>
                   </div>
                 </div>
               );
             })
           ) : (
-            <div className="rounded-2xl border border-white/10 bg-up-surface p-8 text-center text-xs text-up-gray">
-              Aucun dossier KYC ne correspond à ces critères.
+            <div className="rounded-2xl border border-white/10 bg-[#151518] p-8 text-center text-xs text-[#A1A1AA]">
+              Aucun dossier KYC trouvé.
             </div>
           )}
         </div>
 
-        {/* Colonne Droite : Visualiseur Côte à Côte Immersif (8 colonnes) */}
-        {selectedApplicant ? (
-          <div className="lg:col-span-8 rounded-3xl border border-white/10 bg-up-surface p-5 shadow-2xl space-y-5">
-            {/* Header du dossier sélectionné */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-white/10 pb-4">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="font-display text-xl font-bold text-up-white">
-                    {selectedApplicant.fullName}
-                  </h2>
-                  {selectedApplicant.status === "approved" && (
-                    <BadgeCheck size={20} className="text-up-gold" />
-                  )}
-                </div>
-                <p className="text-xs text-up-gray">
-                  Dossier soumis {selectedApplicant.submittedAt} · Téléphone :{" "}
-                  <span className="font-mono text-up-white">
-                    +241 {selectedApplicant.phoneNumber}
-                  </span>{" "}
-                  ({selectedApplicant.operator === "airtel_money" ? "Airtel" : "Moov"})
-                </p>
-              </div>
-
-              {/* Boutons d'Action Rapide de Validation / Rejet */}
-              <div className="flex items-center gap-2">
-                {selectedApplicant.status !== "approved" && (
-                  <button
-                    type="button"
-                    onClick={() => handleApprove(selectedApplicant)}
-                    className="flex items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2.5 text-xs font-bold text-up-black transition hover:bg-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
-                  >
-                    <CheckCircle2 size={15} />
-                    <span>Valider le profil (Badge Vert)</span>
-                  </button>
-                )}
-
-                {selectedApplicant.status !== "rejected" && (
-                  <button
-                    type="button"
-                    onClick={() => setIsRejectModalOpen(true)}
-                    className="flex items-center gap-1.5 rounded-xl border border-red-500/40 bg-red-500/15 px-3.5 py-2.5 text-xs font-bold text-red-300 transition hover:bg-red-500/25"
-                  >
-                    <XCircle size={15} />
-                    <span>Rejeter avec motif</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* VISUALISEUR CÔTE À CÔTE : CNI/PASSEPORT VS SELFIE */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-up-gold">
-                  Visualiseur Comparatif d&apos;Identité
-                </span>
-                <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-400">
-                  <ShieldCheck size={13} />
-                  <span>Concordance Faciale : 98.4%</span>
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* 1. Document Officiel (CNI / Passeport Gabonais) */}
-                <div className="overflow-hidden rounded-2xl border border-white/10 bg-up-black/70 p-3 space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="flex items-center gap-1.5 font-semibold text-up-white">
-                      <FileText size={14} className="text-up-gold" />
-                      <span>
-                        {selectedApplicant.idDocumentType === "cni_gabon"
-                          ? "CNI Gabonaise (Officielle)"
-                          : "Passeport Gabonais"}
-                      </span>
-                    </span>
-                    <span className="font-mono text-[11px] text-up-gold">
-                      {selectedApplicant.nationalIdNumber}
-                    </span>
-                  </div>
-
-                  <div className="relative h-56 w-full overflow-hidden rounded-xl border border-white/10 bg-up-surface">
+        {/* Colonne de droite : Panneau de détail & Actions */}
+        <div className="lg:col-span-7">
+          {selectedApplicant ? (
+            <div className="rounded-[28px] border border-[rgba(212,175,55,0.22)] bg-[#151518] p-6 shadow-2xl space-y-5">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="relative h-14 w-14 overflow-hidden rounded-full border-2 border-[#D4AF37]">
                     <Image
-                      src={selectedApplicant.idDocumentUrl}
-                      alt="Document d'identité officiel"
+                      src={selectedApplicant.avatarUrl}
+                      alt={selectedApplicant.fullName}
                       fill
                       className="object-cover"
                     />
-                    <div className="absolute bottom-2 left-2 rounded-lg bg-up-black/80 px-2 py-1 text-[10px] font-mono text-up-white backdrop-blur">
-                      NIF / CNI : {selectedApplicant.nationalIdNumber}
-                    </div>
                   </div>
-
-                  <div className="rounded-lg bg-white/5 p-2 text-[11px] text-up-gray flex justify-between">
-                    <span>Date de naissance :</span>
-                    <span className="font-semibold text-up-white">
-                      {selectedApplicant.birthDate} ({selectedApplicant.age} ans)
-                    </span>
+                  <div>
+                    <h2 className="font-display text-lg font-bold text-[#FAFAF9]">
+                      {selectedApplicant.fullName}
+                    </h2>
+                    <p className="text-xs text-[#D4AF37]">
+                      {selectedApplicant.phoneNumber} · {selectedApplicant.zone}
+                    </p>
                   </div>
                 </div>
 
-                {/* 2. Selfie Vidéo / Photo HD Profil */}
-                <div className="overflow-hidden rounded-2xl border border-white/10 bg-up-black/70 p-3 space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="flex items-center gap-1.5 font-semibold text-up-white">
-                      <Video size={14} className="text-emerald-400" />
-                      <span>Selfie de Vérification en Direct</span>
-                    </span>
-                    <span className="text-[10px] font-bold text-emerald-400">
-                      ✓ Biométrie validée
-                    </span>
+                {selectedApplicant.status === "pending" && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleApprove(selectedApplicant)}
+                      className="flex items-center gap-1.5 rounded-full bg-[#22C55E] px-4 py-2 text-xs font-bold text-[#0B0B0D] hover:bg-[#22C55E]/90"
+                    >
+                      <Check size={14} />
+                      <span>Approuver</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsRejectModalOpen(true)}
+                      className="flex items-center gap-1.5 rounded-full border border-[#EF4444]/40 bg-[#EF4444]/10 px-3.5 py-2 text-xs font-semibold text-[#EF4444] hover:bg-[#EF4444]/20"
+                    >
+                      <X size={14} />
+                      <span>Rejeter</span>
+                    </button>
                   </div>
-
-                  <div className="relative h-56 w-full overflow-hidden rounded-xl border border-white/10 bg-up-surface">
-                    <Image
-                      src={selectedApplicant.selfieVideoUrl}
-                      alt="Selfie de vérification"
-                      fill
-                      className="object-cover object-top"
-                    />
-                    <div className="absolute bottom-2 left-2 rounded-lg bg-up-black/80 px-2 py-1 text-[10px] font-mono text-emerald-400 backdrop-blur flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      Contrôle Liveness &amp; Détection Mouvement OK
-                    </div>
-                  </div>
-
-                  <div className="rounded-lg bg-white/5 p-2 text-[11px] text-up-gray flex justify-between">
-                    <span>Zone d&apos;activité :</span>
-                    <span className="font-semibold text-up-white">
-                      Libreville · {selectedApplicant.zone}
-                    </span>
-                  </div>
-                </div>
+                )}
               </div>
-            </div>
 
-            {/* Fiche de Compétences & Présentation du Profil */}
-            <div className="rounded-2xl border border-white/10 bg-up-black/40 p-4 space-y-3 text-xs">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-up-gray block">
-                Présentation &amp; Services Proposés
-              </span>
-              <p className="font-semibold text-up-white text-sm">
-                &laquo; {selectedApplicant.headline} &raquo;
-              </p>
-              <p className="text-up-gray leading-relaxed">
-                {selectedApplicant.bio}
-              </p>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-white/5">
-                <div>
-                  <span className="text-[10px] text-up-gray block">Tarif Soirée</span>
-                  <span className="font-display font-bold text-up-gold">
-                    {selectedApplicant.eveningRateXaf.toLocaleString("fr-FR")} FCFA
-                  </span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-up-gray block">Tarif Horaire</span>
-                  <span className="font-display font-bold text-up-white">
+              {/* Détails du profil */}
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="rounded-2xl border border-white/5 bg-[#0B0B0D] p-3">
+                  <span className="text-[10px] text-[#A1A1AA] uppercase">Tarif horaire</span>
+                  <p className="font-bold text-[#FAFAF9] text-sm mt-0.5">
                     {selectedApplicant.hourlyRateXaf.toLocaleString("fr-FR")} FCFA/h
-                  </span>
+                  </p>
                 </div>
-                <div>
-                  <span className="text-[10px] text-up-gray block">Formation</span>
-                  <span className="text-up-white font-medium">
-                    {selectedApplicant.education}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-up-gray block">Langues</span>
-                  <span className="text-up-white font-medium">
-                    {selectedApplicant.languages.join(", ")}
-                  </span>
+                <div className="rounded-2xl border border-white/5 bg-[#0B0B0D] p-3">
+                  <span className="text-[10px] text-[#A1A1AA] uppercase">Forfait soirée</span>
+                  <p className="font-bold text-[#FAFAF9] text-sm mt-0.5">
+                    {selectedApplicant.eveningRateXaf.toLocaleString("fr-FR")} FCFA
+                  </p>
                 </div>
               </div>
 
-              {selectedApplicant.rejectionReason && (
-                <div className="mt-3 rounded-xl border border-red-500/30 bg-red-950/30 p-3 text-xs text-red-300">
-                  <p className="font-bold">Motif du rejet précédent :</p>
-                  <p className="mt-0.5">{selectedApplicant.rejectionReason}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : null}
-      </div>
+              <div className="rounded-2xl border border-white/5 bg-[#0B0B0D] p-4 text-xs space-y-2">
+                <p className="font-bold text-[#FAFAF9]">Biographie &amp; Parcours :</p>
+                <p className="text-[#A1A1AA] leading-relaxed">{selectedApplicant.bio}</p>
+                {selectedApplicant.education && (
+                  <p className="text-[#D4AF37] pt-2 border-t border-white/5">
+                    🎓 Formation : {selectedApplicant.education}
+                  </p>
+                )}
+              </div>
 
-      {/* Modal de Rejet de Candidature avec sélection de motif */}
-      {isRejectModalOpen && selectedApplicant && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-up-black/85 p-5 backdrop-blur-md animate-in fade-in">
-          <div className="w-full max-w-md rounded-3xl border border-red-500/40 bg-up-surface p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-red-400">
-                <UserX size={16} />
-                Rejet du Dossier KYC
-              </span>
-              <button
-                type="button"
-                onClick={() => setIsRejectModalOpen(false)}
-                className="text-up-gray hover:text-up-white"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <form onSubmit={handleConfirmReject} className="mt-4 space-y-4 text-left">
-              <p className="text-xs text-up-gray">
-                Sélectionnez le motif réglementaire du refus pour{" "}
-                <span className="font-semibold text-up-white">
-                  {selectedApplicant.fullName}
-                </span>{" "}
-                (le candidat recevra une notification pour soumettre un nouveau document conforme) :
-              </p>
-
-              {/* Sélection des motifs de rejet */}
-              <div className="space-y-2">
-                {[
-                  "Document CNI/Passeport illisible ou reflets masquant les informations",
-                  "Nom du document ne concordant pas avec le compte Mobile Money",
-                  "Selfie de vérification flou ou concordance biométrique insuffisante",
-                  "Pièce d'identité expirée ou non reconnue par la République Gabonaise",
-                  "Non-respect des critères d'âge légal minimum (21 ans révolus)",
-                ].map((reason) => (
-                  <label
-                    key={reason}
-                    className={`flex items-start gap-2.5 rounded-xl border p-3 text-xs cursor-pointer transition ${
-                      rejectionReason === reason
-                        ? "border-red-500/60 bg-red-950/40 text-up-white"
-                        : "border-white/10 bg-up-black/50 text-up-gray hover:border-white/20"
-                    }`}
+              <div className="flex flex-wrap gap-2 text-xs">
+                {selectedApplicant.services.map((s) => (
+                  <span
+                    key={s}
+                    className="rounded-full border border-white/10 bg-[#202024] px-3 py-1 text-[11px] text-[#FAFAF9]"
                   >
-                    <input
-                      type="radio"
-                      name="rejectionReason"
-                      value={reason}
-                      checked={rejectionReason === reason}
-                      onChange={() => setRejectionReason(reason)}
-                      className="mt-0.5 text-red-500"
-                    />
-                    <span>{reason}</span>
-                  </label>
+                    {s.replace("_", " ")}
+                  </span>
                 ))}
               </div>
+            </div>
+          ) : (
+            <div className="grid place-items-center rounded-[28px] border border-white/10 bg-[#151518] p-12 text-center text-xs text-[#A1A1AA]">
+              Sélectionnez un dossier à modérer.
+            </div>
+          )}
+        </div>
+      </div>
 
-              {/* Note personnalisée optionnelle */}
-              <div>
-                <label
-                  htmlFor="kyc-custom-note"
-                  className="block text-[11px] font-semibold uppercase tracking-wider text-up-gray"
-                >
-                  Précisions additionnelles (Optionnel)
-                </label>
-                <textarea
-                  id="kyc-custom-note"
-                  rows={2}
-                  value={customRejectionNote}
-                  onChange={(e) => setCustomRejectionNote(e.target.value)}
-                  placeholder="Ex : Prière de re-photographier le verso de la CNI sans flash..."
-                  className="mt-1 w-full rounded-xl border border-white/10 bg-up-black/60 p-2.5 text-xs text-up-white placeholder-up-gray focus:border-red-500 focus:outline-none"
-                />
-              </div>
+      {/* Modal Rejet */}
+      {isRejectModalOpen && selectedApplicant && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
+          <div className="w-full max-w-md rounded-3xl border border-[#EF4444]/40 bg-[#151518] p-6 shadow-2xl">
+            <h3 className="font-display text-lg font-bold text-[#FAFAF9]">
+              Rejeter la candidature de {selectedApplicant.fullName}
+            </h3>
+            <p className="mt-1 text-xs text-[#A1A1AA]">
+              Précisez le motif du rejet pour informer le prestataire.
+            </p>
+            <form onSubmit={handleConfirmReject} className="mt-4 space-y-3">
+              <select
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-[#0B0B0D] p-3 text-xs text-[#FAFAF9]"
+              >
+                <option value="Document CNI/Passeport illisible ou reflets masquant les informations">
+                  Document CNI/Passeport illisible
+                </option>
+                <option value="Photo de profil non conforme aux standards UP">
+                  Photo de profil non conforme
+                </option>
+                <option value="Numéro de téléphone ou identité non valide">
+                  Numéro ou identité invalide
+                </option>
+              </select>
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-3">
                 <button
                   type="button"
                   onClick={() => setIsRejectModalOpen(false)}
-                  className="flex-1 rounded-xl border border-white/10 py-3 text-xs font-semibold text-up-gray hover:text-up-white"
+                  className="rounded-xl border border-white/10 px-4 py-2 text-xs text-[#A1A1AA] hover:text-[#FAFAF9]"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 rounded-xl bg-red-500 py-3 text-xs font-bold text-up-white transition hover:bg-red-400"
+                  className="rounded-xl bg-[#EF4444] px-4 py-2 text-xs font-bold text-[#FAFAF9]"
                 >
                   Confirmer le rejet
                 </button>

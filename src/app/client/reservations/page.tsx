@@ -17,7 +17,6 @@ import {
   X,
   XCircle,
 } from "lucide-react";
-import { PageHeader } from "@/components/page-header";
 import { useUpStore, type ClientReservation } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
 
@@ -86,14 +85,19 @@ export default function ReservationsPage() {
   };
 
   return (
-    <>
-      <PageHeader
-        eyebrow="Client"
-        title="Mes Réservations"
-        subtitle="Suivi en direct des missions et comptes séquestres."
-      />
-
-      <div className="px-5 pb-24">
+    <div className="max-w-2xl mx-auto px-4 pt-4 pb-12">
+      <div className="px-1 py-3 text-center sm:text-left">
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#D4AF37]">
+            <Sparkles size={12} />
+            Espace Client
+          </span>
+          <h1 className="mt-1 font-display text-2xl font-bold tracking-tight text-[#FAFAF9] sm:text-3xl">
+            Mes Réservations
+          </h1>
+          <p className="mt-1 text-xs text-[#A1A1AA]">
+            Suivi en direct des missions, statuts et comptes séquestres.
+          </p>
+        </div>
         {hasReservations ? (
           <div className="space-y-4">
             {reservations.map((res) => {
@@ -297,10 +301,9 @@ export default function ReservationsPage() {
             </Link>
           </div>
         )}
-      </div>
 
-      {/* Modal de Validation OTP & Libération des Fonds */}
-      {selectedResForRelease && (
+        {/* Modal de Validation OTP & Libération des Fonds */}
+        {selectedResForRelease && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-up-black/85 p-5 backdrop-blur-md animate-in fade-in">
           <div className="w-full max-w-sm rounded-3xl border border-up-gold/40 bg-up-surface p-6 text-center shadow-2xl">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
@@ -417,6 +420,6 @@ export default function ReservationsPage() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

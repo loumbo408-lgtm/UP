@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -48,6 +48,49 @@ export default function CompanionDashboardPage() {
   const clearRole = useUpStore((s) => s.clearRole);
 
   const isOnline = hydrated && available;
+
+  // Real Supabase profile state
+  const [profileName, setProfileName] = useState<string>("Prestataire UP");
+  const [profileAvatar, setProfileAvatar] = useState<string>(
+    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop",
+  );
+  const [profileZone, setProfileZone] = useState<string>("Libreville");
+
+  useEffect(() => {
+    async function loadCompanionData() {
+      try {
+        const { createClient } = await import("@/lib/supabase/client");
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("*, companion_details(*)")
+            .eq("id", user.id)
+            .maybeSingle();
+
+          if (profile) {
+            setProfileName(profile.full_name || user.user_metadata?.full_name || "Prestataire UP");
+            if (profile.avatar_url) {
+              setProfileAvatar(profile.avatar_url);
+            }
+            const details = Array.isArray(profile.companion_details)
+              ? profile.companion_details[0]
+              : profile.companion_details;
+            if (details?.zone_preference) {
+              setProfileZone(details.zone_preference);
+            }
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+    loadCompanionData();
+  }, []);
 
   // Withdrawal modal state
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
@@ -135,11 +178,14 @@ export default function CompanionDashboardPage() {
         {/* 1. En-tête avec profil et interrupteur lumineux */}
         <header className="border-b border-white/5 bg-up-surface/90 px-5 pt-6 pb-5 backdrop-blur-md">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-up-gold/40">
+            <Link
+              href="/prestataire/profil"
+              className="flex items-center gap-3 group"
+            >
+              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-up-gold/40 transition group-hover:border-up-gold">
                 <Image
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop"
-                  alt="Profil Prestataire"
+                  src={profileAvatar}
+                  alt={profileName}
                   fill
                   className="object-cover object-top"
                 />
@@ -149,30 +195,38 @@ export default function CompanionDashboardPage() {
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <h1 className="font-display text-base font-bold text-up-white">
-                    Awa N.
+                  <h1 className="font-display text-base font-bold text-up-white group-hover:text-up-gold transition">
+                    {profileName}
                   </h1>
                   <BadgeCheck size={16} className="text-up-gold" />
                 </div>
                 <div className="flex items-center gap-2 text-xs text-up-gray">
                   <span className="flex items-center gap-0.5 text-up-gold">
                     <Star size={12} className="fill-up-gold" />
-                    4.9
+                    5.0
                   </span>
                   <span>·</span>
-                  <span>Libreville · Glass</span>
+                  <span>Libreville · {profileZone}</span>
                 </div>
               </div>
-            </div>
-
-            <Link
-              href="/"
-              onClick={() => clearRole()}
-              className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-[11px] text-up-gray hover:text-up-white"
-            >
-              <Repeat size={13} className="text-up-gold" />
-              <span>Rôle</span>
             </Link>
+
+            <div className="flex items-center gap-2">
+              <Link
+                href="/prestataire/profil"
+                className="flex items-center gap-1.5 rounded-xl border border-up-gold/30 bg-up-gold/10 px-3 py-1.5 text-xs font-semibold text-up-gold transition hover:bg-up-gold/20"
+              >
+                <span>Tarifs &amp; Profil</span>
+              </Link>
+              <Link
+                href="/"
+                onClick={() => clearRole()}
+                className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-[11px] text-up-gray hover:text-up-white"
+              >
+                <Repeat size={13} className="text-up-gold" />
+                <span>Rôle</span>
+              </Link>
+            </div>
           </div>
 
           {/* Interrupteur lumineux DISPONIBLE CE SOIR / HORS LIGNE */}
