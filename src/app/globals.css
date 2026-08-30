@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-night text-ink antialiased;
+    /* Halo dore discret en haut de page, fige (pas de repetition au scroll). */
+    background-image: radial-gradient(
+      120% 60% at 50% -10%,
+      rgba(212, 175, 55, 0.08) 0%,
+      transparent 60%
+    );
+    background-attachment: fixed;
+  }
+
+  /* Cible tactile minimale sur mobile. */
+  button,
+  a[role='button'] {
+    @apply select-none;
+  }
+
+  input,
+  textarea,
+  select {
+    @apply bg-night-raised border border-night-border text-ink placeholder:text-ink-faint;
+    @apply rounded-xl px-4 py-3 text-[15px] w-full outline-none transition;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    @apply border-gold/60 ring-2 ring-gold/20;
+  }
+
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}
+
+@layer components {
+  .up-card {
+    @apply bg-night-soft border border-night-border rounded-2xl shadow-card;
+  }
+
+  .up-label {
+    @apply block text-xs font-medium uppercase tracking-wider text-ink-faint mb-2;
+  }
+
+  /* Filet dore utilise pour separer les sections premium. */
+  .up-rule {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-gold/40 to-transparent;
+  }
+
+  .up-skeleton {
+    @apply relative overflow-hidden bg-night-raised;
+  }
+
+  .up-skeleton::after {
+    @apply absolute inset-0 -translate-x-full animate-shimmer;
+    content: '';
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.04),
+      transparent
+    );
+  }
+}
