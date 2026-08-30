@@ -32,7 +32,7 @@ import { PersonaShell } from "@/components/persona-shell";
 import { prestataireNav } from "@/lib/nav";
 import { useUpStore, type RadarDemand } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
-import { COMPANIONS } from "@/lib/data";
+import { SECURE_PUBLIC_VENUES } from "@/lib/data";
 
 export default function CompanionDashboardPage() {
   const hydrated = useHydrated();
@@ -138,8 +138,8 @@ export default function CompanionDashboardPage() {
             <div className="flex items-center gap-3">
               <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-up-gold/40">
                 <Image
-                  src={COMPANIONS[0].avatar}
-                  alt="Awa N."
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop"
+                  alt="Profil Prestataire"
                   fill
                   className="object-cover object-top"
                 />

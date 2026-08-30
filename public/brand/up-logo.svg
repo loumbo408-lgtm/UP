@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- UP Official Monogram Vector -->
+  <g fill="currentColor">
+    <!-- Arrow Head & Central Column -->
+    <path d="M256 112 C248 112 240 116 235 122 L196 174 C188 184 195 198 208 198 H236 V336 C236 347 245 356 256 356 C267 356 276 347 276 336 V198 H304 C317 198 324 184 316 174 L277 122 C272 116 264 112 256 112 Z" />
+    <!-- Left Pillar -->
+    <rect x="142" y="172" width="42" height="114" rx="21" />
+    <!-- Right Pillar -->
+    <rect x="328" y="172" width="42" height="114" rx="21" />
+    <!-- Bottom U-Curve Bridge -->
+    <path d="M142 260 C142 342 193 392 256 392 C319 392 370 342 370 260 H328 C328 318 296 352 256 352 C216 352 184 318 184 260 H142 Z" />
+  </g>
+</svg>

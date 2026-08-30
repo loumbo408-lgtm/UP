@@ -1,24 +1,47 @@
 @import "tailwindcss";
 
 /* =====================================================================
-   Charte graphique premium UP
-   Tailwind v4 : la config du theme se fait ici via @theme.
-   Chaque token --color-xxx genere les utilitaires bg-, text-, border-, etc.
+   Charte Graphique UP Gabon — Direction Artistique Officielle
    ===================================================================== */
+:root {
+  --up-background: #0B0B0D;
+  --up-surface: #151518;
+  --up-surface-elevated: #202024;
+  --up-gold: #D4AF37;
+  --up-gold-light: #F1D875;
+  --up-text: #FAFAF9;
+  --up-muted: #A1A1AA;
+  --up-border: rgba(212, 175, 55, 0.22);
+  --up-success: #22C55E;
+  --up-danger: #EF4444;
+
+  /* Safe areas mobile */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+}
+
 @theme {
   /* Fonds */
-  --color-up-black: #0b0b0c;
-  --color-up-surface: #121214;
+  --color-up-background: #0b0b0d;
+  --color-up-black: #0b0b0d;
+  --color-up-surface: #151518;
+  --color-up-surface-elevated: #202024;
 
-  /* Accents — Or prestige */
+  /* Accents Or Prestige */
   --color-up-gold: #d4af37;
-  --color-up-gold-soft: #f3e5ab;
+  --color-up-gold-light: #f1d875;
+  --color-up-gold-soft: #f1d875;
 
-  /* Textes */
-  --color-up-white: #ffffff;
+  /* Typographie & États */
+  --color-up-text: #fafaf9;
+  --color-up-white: #fafaf9;
+  --color-up-muted: #a1a1aa;
   --color-up-gray: #a1a1aa;
+  --color-up-border: rgba(212, 175, 55, 0.22);
+  --color-up-success: #22c55e;
+  --color-up-danger: #ef4444;
 
-  /* Typographie (variables injectées par next/font dans le <html>) */
+  /* Typographie */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, sans-serif;
   --font-display: var(--font-playfair), ui-serif, Georgia, "Times New Roman",
@@ -31,18 +54,40 @@
   }
 
   html {
-    background-color: var(--color-up-black);
+    background-color: var(--up-background);
+    color: var(--up-text);
     -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
   }
 
   body {
-    background-color: var(--color-up-black);
-    color: var(--color-up-white);
+    background-color: var(--up-background);
+    color: var(--up-text);
+    min-height: 100dvh;
+    overflow-x: hidden;
   }
 
-  /* Masque la molette latérale sur la coquille mobile, sans bloquer le scroll */
+  /* Support des encoches mobiles */
+  .safe-top {
+    padding-top: var(--sat);
+  }
+  .safe-bottom {
+    padding-bottom: var(--sab);
+  }
+
+  /* Masque la barre de défilement tout en préservant le scroll */
   ::-webkit-scrollbar {
-    width: 0;
-    height: 0;
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0B0B0D;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #202024;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #D4AF37;
   }
 }

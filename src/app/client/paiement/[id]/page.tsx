@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useUpStore, type ClientReservation } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
-import { COMPANIONS } from "@/lib/data";
+
 
 type Step = "select_operator" | "waiting_ussd" | "escrow_confirmed";
 
@@ -47,7 +47,8 @@ export default function ClientPaymentPage({
     id: reservationId,
     companionId: "awa-n",
     companionName: "Awa N.",
-    companionAvatar: COMPANIONS[0].avatar,
+    companionAvatar:
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop",
     companionZone: "Glass",
     date: "2026-08-31",
     time: "19:30",

@@ -33,7 +33,7 @@ import {
 } from "lucide-react";
 import { useUpStore, type ClientReservation } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
-import { COMPANIONS, SECURE_PUBLIC_VENUES } from "@/lib/data";
+import { SECURE_PUBLIC_VENUES } from "@/lib/data";
 
 type MissionLiveStatus = "waiting" | "in_progress" | "completed";
 
@@ -62,7 +62,13 @@ export default function ActiveMissionPage({
   // Find or fallback to a realistic mission
   const storedReservation = reservations.find((r) => r.id === missionId);
 
-  const companion = COMPANIONS[0]; // Awa N.
+  const companion = {
+    name: storedReservation?.companionName || "Prestataire Certifié",
+    avatar:
+      storedReservation?.companionAvatar ||
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop",
+    zone: storedReservation?.companionZone || "Libreville",
+  };
   const venue = SECURE_PUBLIC_VENUES[1]; // Radisson Blu O'Mbali
 
   const [missionStatus, setMissionStatus] = useState<MissionLiveStatus>(
