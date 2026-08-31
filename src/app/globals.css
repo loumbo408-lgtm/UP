@@ -94,17 +94,56 @@
 
 /* Utilitaires spécifiques ILLUSTRATION2.webp */
 .glass-pill {
-  background: rgba(11, 11, 13, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(21, 21, 24, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
+.glass-pill-active {
+  background: #D4AF37;
+  color: #0B0B0D;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.35);
+  border: 1px solid #F1D875;
+}
+
 .floating-action-btn {
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(212, 175, 55, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.2);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.floating-action-btn:hover {
+  transform: translateY(-2px) scale(1.04);
+}
+
 .floating-action-btn:active {
-  transform: scale(0.92);
+  transform: scale(0.94);
+}
+
+/* Card stack 3D layers */
+.card-stack-base {
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-layer-back-1 {
+  transform: scale(0.94) translateY(14px) rotate(2.5deg);
+  opacity: 0.55;
+  filter: blur(0.5px);
+}
+
+.card-layer-back-2 {
+  transform: scale(0.88) translateY(26px) rotate(-2deg);
+  opacity: 0.3;
+  filter: blur(1px);
+}
+
+/* Story indicator animation */
+@keyframes storyProgress {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+.story-progress-active {
+  animation: storyProgress 5s linear infinite;
 }

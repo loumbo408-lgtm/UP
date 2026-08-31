@@ -214,8 +214,8 @@ export default function CompanionDetailPage({
           </button>
         </div>
 
-        {/* Hero Section / Photo Immersive */}
-        <div className="relative aspect-[16/11] w-full overflow-hidden rounded-3xl border border-[rgba(212,175,55,0.22)] bg-[#0B0B0D] shadow-2xl">
+        {/* Hero Section / Photo Immersive (Style Screen 3 ILLUSTRATION2.webp) */}
+        <div className="relative aspect-[4/5] sm:aspect-[16/10] w-full overflow-hidden rounded-[32px] border border-[rgba(212,175,55,0.3)] bg-[#0B0B0D] shadow-2xl">
           <Image
             src={companion.avatar}
             alt={companion.name}
@@ -224,29 +224,92 @@ export default function CompanionDetailPage({
             sizes="(max-width: 1024px) 100vw, 768px"
             className="object-cover object-top"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0D] via-[#0B0B0D]/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0D] via-[#0B0B0D]/30 to-black/30" />
 
-          {/* Badge KYC Flottant */}
-          <div className="absolute left-4 top-4 flex items-center gap-1.5 rounded-full border border-[#D4AF37]/50 bg-[#0B0B0D]/85 px-3 py-1 text-xs font-semibold text-[#D4AF37] backdrop-blur-md shadow-lg">
-            <BadgeCheck size={16} className="text-[#D4AF37]" />
-            <span>Identité Vérifiée (KYC)</span>
+          {/* Barres de Story en haut */}
+          <div className="absolute left-5 right-5 top-4 flex gap-1.5 z-20">
+            <div className="h-1 flex-1 rounded-full bg-white shadow-md" />
+            <div className="h-1 flex-1 rounded-full bg-white/40" />
+            <div className="h-1 flex-1 rounded-full bg-white/40" />
           </div>
 
-          {/* Nom & Localisation */}
-          <div className="absolute bottom-4 left-5 right-5">
-            <h1 className="font-display text-2xl font-bold tracking-tight text-[#FAFAF9] sm:text-3xl">
-              {companion.name}
-            </h1>
-            <p className="mt-1 flex items-center gap-1.5 text-xs text-[#F1D875]">
-              <MapPin size={13} className="text-[#D4AF37]" />
-              <span>Libreville · {companion.zone}</span>
-            </p>
+          {/* Boutons de navigation flottants en haut */}
+          <div className="absolute left-5 right-5 top-8 flex items-center justify-between z-20">
+            <Link
+              href="/explore"
+              className="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-black/60 text-[#FAFAF9] backdrop-blur-md transition hover:border-white/40 hover:bg-black/80"
+              aria-label="Retour"
+            >
+              <ArrowLeft size={18} />
+            </Link>
+
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-black/60 px-3 py-1 text-[11px] font-semibold text-emerald-400 backdrop-blur-md shadow-lg">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse" />
+                <span>En ligne</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsFavorite(!isFavorite)}
+                className={`grid h-10 w-10 place-items-center rounded-full border backdrop-blur-md transition ${
+                  isFavorite
+                    ? "border-[#EF4444] bg-[#EF4444]/20 text-[#EF4444]"
+                    : "border-white/20 bg-black/60 text-[#FAFAF9] hover:border-white/40"
+                }`}
+                aria-label="Favori"
+              >
+                <Heart size={18} className={isFavorite ? "fill-[#EF4444]" : ""} />
+              </button>
+            </div>
+          </div>
+
+          {/* Contenu superposé en bas de la photo (Style ILLUSTRATION2.webp Screen 3) */}
+          <div className="absolute bottom-6 left-6 right-6 z-20">
+            <div className="flex items-baseline justify-between">
+              <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-[#FAFAF9]">
+                {companion.name}
+              </h1>
+              <span className="font-display text-lg font-bold text-[#D4AF37]">
+                {companion.hourlyRate.toLocaleString("fr-FR")}{" "}
+                <span className="text-xs font-normal text-[#A1A1AA]">
+                  FCFA/h
+                </span>
+              </span>
+            </div>
+
+            {/* Drapeau Gabon + Ville + Distance */}
+            <div className="mt-2 flex items-center gap-2 flex-wrap">
+              <span className="flex items-center gap-1.5 rounded-full border border-white/15 bg-black/50 px-3 py-1 text-xs font-medium text-[#FAFAF9] backdrop-blur-md">
+                <span>🇬🇦 Gabon, {companion.zone}</span>
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-[#FAFAF9] backdrop-blur-md">
+                2.8 km
+              </span>
+              <span className="flex items-center gap-1 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/15 px-3 py-1 text-[11px] font-bold text-[#D4AF37] backdrop-blur-md">
+                <BadgeCheck size={14} />
+                <span>Identité Vérifiée</span>
+              </span>
+            </div>
+
+            {/* Tags de compétences en pilules translucides avec icônes */}
+            <div className="mt-3.5 flex flex-wrap gap-1.5">
+              {companion.services.map((srv) => (
+                <span
+                  key={srv}
+                  className="flex items-center gap-1 rounded-full border border-white/15 bg-black/50 px-3 py-1 text-[11px] font-medium text-[#FAFAF9] backdrop-blur-md"
+                >
+                  <span className="text-[#D4AF37]">✦</span>
+                  <span>{srv.replace("_", " ")}</span>
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Grille Tarifs */}
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-white/10 bg-[#151518] p-4 shadow-md">
+          <div className="rounded-[24px] border border-white/10 bg-[#151518] p-4 shadow-md">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-[#A1A1AA]">
               Tarif horaire
             </span>
@@ -255,7 +318,7 @@ export default function CompanionDetailPage({
               <span className="text-xs font-normal text-[#D4AF37]">FCFA/h</span>
             </p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-[#151518] p-4 shadow-md">
+          <div className="rounded-[24px] border border-white/10 bg-[#151518] p-4 shadow-md">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-[#A1A1AA]">
               Forfait soirée (5h+)
             </span>

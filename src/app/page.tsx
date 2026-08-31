@@ -34,59 +34,72 @@ export default function LandingPage() {
 
   return (
     <AppShell showHeader={true} showBottomNav={false} maxWidth="full" className="px-0 sm:px-0 lg:px-0">
-      {/* 1. HERO SECTION */}
-      <section className="relative overflow-hidden border-b border-[rgba(212,175,55,0.22)] bg-gradient-to-b from-[#151518] via-[#0B0B0D] to-[#0B0B0D] px-4 pt-12 pb-20 sm:px-6 lg:px-8 lg:pt-20 lg:pb-32">
+      {/* 1. HERO SECTION (Inspiré fidèlement de ILLUSTRATION2.webp - Screen 1 Onboarding) */}
+      <section className="relative overflow-hidden border-b border-[rgba(212,175,55,0.22)] bg-gradient-to-b from-[#151518] via-[#0B0B0D] to-[#0B0B0D] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-16 lg:pb-28">
         {/* Glow ambient effects */}
         <div className="pointer-events-none absolute -top-24 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-[#D4AF37]/10 blur-3xl" />
-        <div className="pointer-events-none absolute top-1/2 right-10 h-72 w-72 rounded-full bg-[#D4AF37]/5 blur-2xl" />
+        <div className="pointer-events-none absolute top-1/3 right-10 h-72 w-72 rounded-full bg-[#D4AF37]/5 blur-2xl" />
 
         <div className="relative mx-auto max-w-5xl text-center">
-          {/* Badge officiel */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.3)] bg-[#151518]/90 px-4 py-1.5 text-xs font-semibold text-[#D4AF37] backdrop-blur-md shadow-[0_0_20px_rgba(212,175,55,0.15)]">
-            <Sparkles size={14} className="text-[#D4AF37]" />
-            <span>Conciergerie Privée &amp; Accompagnement d&apos;Élite au Gabon</span>
+          {/* Floating Media & Interest Badge Collage (Style Screen 1 ILLUSTRATION2.webp) */}
+          <div className="mb-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#151518]/90 px-3.5 py-1.5 text-xs font-semibold text-[#FAFAF9] shadow-lg backdrop-blur-md">
+              <Utensils size={13} className="text-[#D4AF37]" />
+              <span>Dîners Gastronomiques</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/15 px-4 py-1.5 text-xs font-bold text-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.2)] backdrop-blur-md">
+              <Sparkles size={13} />
+              <span>Accompagnement VIP Gabon</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#151518]/90 px-3.5 py-1.5 text-xs font-semibold text-[#FAFAF9] shadow-lg backdrop-blur-md">
+              <PartyPopper size={13} className="text-[#F1D875]" />
+              <span>Événements &amp; Galas</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#151518]/90 px-3.5 py-1.5 text-xs font-semibold text-[#FAFAF9] shadow-lg backdrop-blur-md">
+              <Briefcase size={13} className="text-[#D4AF37]" />
+              <span>Rendez-vous d&apos;Affaires</span>
+            </span>
           </div>
 
-          {/* Titre Principal */}
-          <h1 className="mt-8 font-display text-3xl font-bold tracking-tight text-[#FAFAF9] sm:text-5xl lg:text-6xl lg:leading-tight">
-            Votre temps mérite <br className="hidden sm:inline" />
+          {/* Titre Editorial Stylisé (Style "Swipe. Match. Chat. Meet." de ILLUSTRATION2.webp) */}
+          <h1 className="font-display text-4xl font-bold tracking-tight text-[#FAFAF9] sm:text-6xl lg:text-7xl lg:leading-tight">
+            Découvrez. Réservez. <br className="hidden sm:inline" />
             <span className="bg-gradient-to-r from-[#FAFAF9] via-[#F1D875] to-[#D4AF37] bg-clip-text text-transparent">
-              une présence de qualité.
+              Vibrez. Rencontrez.
             </span>
           </h1>
 
           {/* Sous-titre */}
           <p className="mx-auto mt-6 max-w-2xl text-sm leading-relaxed text-[#A1A1AA] sm:text-base lg:text-lg">
-            Découvrez des profils vérifiés pour vos événements, rendez-vous professionnels et moments de compagnie encadrés.
+            Trouvez une présence d&apos;exception pour vos dîners, vernissages, délégations d&apos;affaires et moments de partage encadrés au Gabon.
           </p>
 
-          {/* Boutons d'Action Principaux */}
-          <div className="mt-10 flex flex-col items-center justify-center gap-3.5 sm:flex-row sm:gap-4">
+          {/* Boutons d'Action Principaux (Bouton Pilule avec flèche > comme ILLUSTRATION2.webp) */}
+          <div className="mt-8 flex flex-col items-center justify-center gap-3.5 sm:flex-row sm:gap-4">
             <Link
               href="/explore"
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#D4AF37] px-8 py-4 text-sm font-bold text-[#0B0B0D] transition-all hover:bg-[#F1D875] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] sm:w-auto"
+              className="flex w-full items-center justify-center gap-3 rounded-full bg-[#D4AF37] px-8 py-4 text-sm font-bold text-[#0B0B0D] transition-all hover:bg-[#F1D875] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] sm:w-auto"
             >
-              <Compass size={18} />
-              <span>Trouver un profil</span>
+              <span>Commencer maintenant</span>
               <ArrowRight size={16} />
             </Link>
 
             <Link
               href="/auth/signup?role=companion"
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[rgba(212,175,55,0.3)] bg-[#151518] px-8 py-4 text-sm font-bold text-[#FAFAF9] transition-all hover:border-[#D4AF37] hover:bg-[#202024] sm:w-auto"
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-[rgba(212,175,55,0.3)] bg-[#151518] px-8 py-4 text-sm font-bold text-[#FAFAF9] transition-all hover:border-[#D4AF37] hover:bg-[#202024] sm:w-auto"
             >
-              <Sparkles size={18} className="text-[#D4AF37]" />
-              <span>Proposer mes services</span>
+              <Sparkles size={16} className="text-[#D4AF37]" />
+              <span>Devenir prestataire</span>
             </Link>
           </div>
 
           {/* Garanties clés */}
           <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4 max-w-3xl mx-auto">
-            <div className="flex items-center gap-2 rounded-xl border border-white/5 bg-[#151518]/60 p-3 text-left">
+            <div className="flex items-center gap-2 rounded-2xl border border-white/5 bg-[#151518]/60 p-3 text-left">
               <ShieldCheck size={16} className="text-[#22C55E] shrink-0" />
               <span className="text-xs font-medium text-[#FAFAF9]">Identités Vérifiées</span>
             </div>
-            <div className="flex items-center gap-2 rounded-xl border border-white/5 bg-[#151518]/60 p-3 text-left">
+            <div className="flex items-center gap-2 rounded-2xl border border-white/5 bg-[#151518]/60 p-3 text-left">
               <Building size={16} className="text-[#D4AF37] shrink-0" />
               <span className="text-xs font-medium text-[#FAFAF9]">Lieux Publics Certifiés</span>
             </div>
@@ -94,7 +107,7 @@ export default function LandingPage() {
               <Lock size={16} className="text-[#D4AF37] shrink-0" />
               <span className="text-xs font-medium text-[#FAFAF9]">Séquestre Mobile Money</span>
             </div>
-            <div className="flex items-center gap-2 rounded-xl border border-white/5 bg-[#151518]/60 p-3 text-left">
+            <div className="flex items-center gap-2 rounded-2xl border border-white/5 bg-[#151518]/60 p-3 text-left">
               <CheckCircle2 size={16} className="text-[#22C55E] shrink-0" />
               <span className="text-xs font-medium text-[#FAFAF9]">Validation par Code OTP</span>
             </div>
