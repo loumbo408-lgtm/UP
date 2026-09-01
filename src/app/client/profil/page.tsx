@@ -187,16 +187,16 @@ export default function ClientProfilPage() {
   return (
     <AppShell showHeader={true} showBottomNav={true} maxWidth="md">
       <div className="pt-2 pb-12">
-        {/* En-tête profil */}
+        {/* En-tête profil client */}
         <div className="px-1 py-3 text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#D4AF37]">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-up-200 bg-up-50 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-up-700">
             <Sparkles size={13} />
-            Espace Membre Client
+            Espace Client Membre
           </span>
-          <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-[#FAFAF9]">
-            Mon Profil &amp; Paramètres
+          <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-[#1D0F24]">
+            Mon Profil &amp; Préférences
           </h1>
-          <p className="mt-1 text-xs text-[#A1A1AA]">
+          <p className="mt-1 text-xs text-[#6B5D73]">
             Gérez vos informations privées et votre photo de profil
           </p>
         </div>
@@ -206,8 +206,8 @@ export default function ClientProfilPage() {
           <div
             className={`mt-4 flex items-center gap-2.5 rounded-2xl p-4 text-xs animate-in fade-in ${
               statusMessage.type === "success"
-                ? "border border-[#22C55E]/40 bg-[#22C55E]/10 text-[#22C55E]"
-                : "border border-[#EF4444]/40 bg-[#EF4444]/10 text-[#EF4444]"
+                ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                : "border border-red-200 bg-red-50 text-red-600"
             }`}
           >
             {statusMessage.type === "success" ? (
@@ -222,8 +222,8 @@ export default function ClientProfilPage() {
         {/* Formulaire de Profil & Téléversement de Photo */}
         <form onSubmit={handleSaveProfile} className="mt-6 space-y-6">
           {/* Carte Avatar */}
-          <div className="rounded-[28px] border border-[rgba(212,175,55,0.22)] bg-[#151518] p-6 text-center shadow-xl">
-            <div className="relative mx-auto h-28 w-28 overflow-hidden rounded-full border-2 border-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+          <div className="rounded-3xl border border-[#F0E6F3] bg-white p-6 text-center shadow-xs">
+            <div className="relative mx-auto h-28 w-28 overflow-hidden rounded-full border-2 border-up-500 shadow-md shadow-up-500/20">
               {avatarUrl ? (
                 <Image
                   src={avatarUrl}
@@ -232,7 +232,7 @@ export default function ClientProfilPage() {
                   className="object-cover"
                 />
               ) : (
-                <div className="grid h-full w-full place-items-center bg-[#202024] text-[#D4AF37]">
+                <div className="grid h-full w-full place-items-center bg-up-50 text-up-600">
                   <User size={40} />
                 </div>
               )}
@@ -250,28 +250,28 @@ export default function ClientProfilPage() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-1.5 rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-4 py-2 text-xs font-semibold text-[#D4AF37] transition hover:bg-[#D4AF37]/20"
+                className="flex items-center gap-1.5 rounded-full border border-up-200 bg-up-50 px-4 py-2 text-xs font-semibold text-up-700 transition hover:bg-up-100"
               >
                 <Camera size={14} />
                 <span>Changer la photo</span>
               </button>
             </div>
-            <p className="mt-2 text-[10px] text-[#A1A1AA]">
+            <p className="mt-2 text-[10px] text-[#6B5D73]">
               Formats acceptés : JPG, PNG, WEBP (Max. 5 Mo)
             </p>
           </div>
 
           {/* Informations Personnelles */}
-          <div className="rounded-[28px] border border-white/10 bg-[#151518] p-6 shadow-xl space-y-4">
-            <h2 className="font-display text-base font-bold text-[#FAFAF9] flex items-center gap-2">
-              <User size={16} className="text-[#D4AF37]" />
+          <div className="rounded-3xl border border-[#F0E6F3] bg-white p-6 shadow-xs space-y-4">
+            <h2 className="font-display text-base font-bold text-[#1D0F24] flex items-center gap-2">
+              <User size={16} className="text-up-500" />
               <span>Informations du Compte</span>
             </h2>
 
             <div>
               <label
                 htmlFor="client-fullname"
-                className="block text-[11px] font-semibold uppercase tracking-wider text-[#A1A1AA]"
+                className="block text-[11px] font-semibold uppercase tracking-wider text-[#6B5D73]"
               >
                 Nom et Prénom
               </label>
@@ -282,19 +282,19 @@ export default function ClientProfilPage() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Ex: Jean-Paul Mba"
-                className="mt-1.5 w-full rounded-2xl border border-white/10 bg-[#0B0B0D] p-3 text-xs text-[#FAFAF9] focus:border-[#D4AF37] focus:outline-none"
+                className="mt-1.5 w-full rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] p-3 text-xs text-[#1D0F24] focus:border-up-500 focus:outline-none"
               />
             </div>
 
             <div>
               <label
                 htmlFor="client-phone"
-                className="block text-[11px] font-semibold uppercase tracking-wider text-[#A1A1AA]"
+                className="block text-[11px] font-semibold uppercase tracking-wider text-[#6B5D73]"
               >
                 Numéro de Téléphone (Mobile Money)
               </label>
               <div className="relative mt-1.5 flex items-center">
-                <Phone size={15} className="absolute left-3.5 text-[#A1A1AA]" />
+                <Phone size={15} className="absolute left-3.5 text-[#6B5D73]" />
                 <input
                   id="client-phone"
                   type="tel"
@@ -302,7 +302,7 @@ export default function ClientProfilPage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+241 074 12 34 56"
-                  className="w-full rounded-2xl border border-white/10 bg-[#0B0B0D] py-3 pl-10 pr-3 text-xs text-[#FAFAF9] focus:border-[#D4AF37] focus:outline-none"
+                  className="w-full rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] py-3 pl-10 pr-3 text-xs text-[#1D0F24] focus:border-up-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -310,21 +310,21 @@ export default function ClientProfilPage() {
             <div>
               <label
                 htmlFor="client-email"
-                className="block text-[11px] font-semibold uppercase tracking-wider text-[#A1A1AA]"
+                className="block text-[11px] font-semibold uppercase tracking-wider text-[#6B5D73]"
               >
                 Adresse E-mail
               </label>
               <div className="relative mt-1.5 flex items-center">
-                <Mail size={15} className="absolute left-3.5 text-[#A1A1AA]" />
+                <Mail size={15} className="absolute left-3.5 text-[#6B5D73]" />
                 <input
                   id="client-email"
                   type="email"
                   disabled
                   value={email}
-                  className="w-full rounded-2xl border border-white/5 bg-[#0B0B0D]/50 py-3 pl-10 pr-3 text-xs text-[#A1A1AA] cursor-not-allowed opacity-80"
+                  className="w-full rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB]/60 py-3 pl-10 pr-3 text-xs text-[#6B5D73] cursor-not-allowed opacity-80"
                 />
               </div>
-              <p className="mt-1 text-[10px] text-[#A1A1AA]/60">
+              <p className="mt-1 text-[10px] text-[#6B5D73]">
                 L&apos;adresse e-mail est liée à votre authentification sécurisée.
               </p>
             </div>
@@ -332,20 +332,20 @@ export default function ClientProfilPage() {
             <div>
               <label
                 htmlFor="client-zone"
-                className="block text-[11px] font-semibold uppercase tracking-wider text-[#A1A1AA]"
+                className="block text-[11px] font-semibold uppercase tracking-wider text-[#6B5D73]"
               >
                 Quartier / Zone Principale
               </label>
               <div className="relative mt-1.5 flex items-center">
-                <MapPin size={15} className="absolute left-3.5 text-[#D4AF37]" />
+                <MapPin size={15} className="absolute left-3.5 text-up-500" />
                 <select
                   id="client-zone"
                   value={selectedZone}
                   onChange={(e) => setSelectedZone(e.target.value as Zone)}
-                  className="w-full appearance-none rounded-2xl border border-white/10 bg-[#0B0B0D] py-3 pl-10 pr-8 text-xs text-[#FAFAF9] focus:border-[#D4AF37] focus:outline-none"
+                  className="w-full appearance-none rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] py-3 pl-10 pr-8 text-xs text-[#1D0F24] focus:border-up-500 focus:outline-none"
                 >
                   {ZONES.filter((z) => z !== "Toutes").map((z) => (
-                    <option key={z} value={z} className="bg-[#151518] text-[#FAFAF9]">
+                    <option key={z} value={z} className="bg-white text-[#1D0F24]">
                       {z}
                     </option>
                   ))}
@@ -358,7 +358,7 @@ export default function ClientProfilPage() {
           <button
             type="submit"
             disabled={isSaving}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#D4AF37] py-4 text-xs font-bold text-[#0B0B0D] transition-all hover:bg-[#F1D875] hover:shadow-[0_0_25px_rgba(212,175,55,0.4)] disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-up-500 text-white hover:bg-up-600 shadow-md shadow-up-500/20 active:scale-[0.98] py-4 text-xs font-bold transition-all disabled:opacity-50"
           >
             {isSaving ? (
               <span>Enregistrement en cours...</span>
@@ -372,27 +372,27 @@ export default function ClientProfilPage() {
         </form>
 
         {/* Changer d'espace / Rôle */}
-        <div className="mt-8 rounded-[28px] border border-white/10 bg-[#151518] p-6 space-y-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#A1A1AA]">
+        <div className="mt-8 rounded-3xl border border-[#F0E6F3] bg-white p-6 space-y-3 shadow-xs">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#6B5D73]">
             Espaces &amp; Navigation
           </p>
 
           <button
             type="button"
             onClick={() => handleSwitchRole("prestataire")}
-            className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-[#0B0B0D] p-3.5 text-xs font-semibold text-[#FAFAF9] transition hover:border-[#D4AF37]"
+            className="flex w-full items-center justify-between rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] p-3.5 text-xs font-semibold text-[#1D0F24] transition hover:border-up-300"
           >
             <span className="flex items-center gap-2.5">
-              <Sparkles size={16} className="text-[#F1D875]" />
+              <Sparkles size={16} className="text-up-500" />
               <span>Accéder à l&apos;Espace Prestataire</span>
             </span>
-            <Repeat size={14} className="text-[#A1A1AA]" />
+            <Repeat size={14} className="text-[#6B5D73]" />
           </button>
 
           <button
             type="button"
             onClick={handleSignOut}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-[#0B0B0D] py-3 text-xs font-semibold text-[#EF4444] transition hover:bg-[#EF4444]/10 hover:border-[#EF4444]/30"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50/50 py-3 text-xs font-semibold text-red-600 transition hover:bg-red-100/50"
           >
             <LogOut size={16} />
             <span>Se déconnecter</span>

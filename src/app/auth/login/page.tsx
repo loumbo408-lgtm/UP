@@ -80,21 +80,21 @@ function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md rounded-3xl border border-[rgba(212,175,55,0.22)] bg-[#151518] p-8 shadow-[0_15px_50px_rgba(0,0,0,0.8)]">
+    <div className="w-full max-w-md rounded-3xl border border-[#F0E6F3] bg-white p-8 shadow-sm">
       <div className="text-center">
         <div className="inline-block">
           <UpLogo size={44} showText={false} />
         </div>
-        <h1 className="mt-4 font-display text-2xl font-bold tracking-tight text-[#FAFAF9]">
+        <h1 className="mt-4 font-display text-2xl font-bold tracking-tight text-[#1D0F24]">
           Connexion Espace Membre
         </h1>
-        <p className="mt-1.5 text-xs text-[#A1A1AA]">
+        <p className="mt-1.5 text-xs text-[#6B5D73]">
           Accédez à vos réservations et missions en toute discrétion
         </p>
       </div>
 
       {errorMessage && (
-        <div className="mt-5 flex items-start gap-2.5 rounded-2xl border border-[#EF4444]/30 bg-[#EF4444]/10 p-3.5 text-xs text-[#EF4444] animate-in fade-in">
+        <div className="mt-5 flex items-start gap-2.5 rounded-2xl border border-red-200 bg-red-50 p-3.5 text-xs text-red-600 animate-in fade-in">
           <AlertCircle size={16} className="mt-0.5 shrink-0" />
           <span>{errorMessage}</span>
         </div>
@@ -104,14 +104,14 @@ function LoginForm() {
         <div>
           <label
             htmlFor="login-email"
-            className="block text-[11px] font-semibold uppercase tracking-wider text-[#D4AF37]"
+            className="block text-[11px] font-semibold uppercase tracking-wider text-up-700"
           >
             Adresse E-mail
           </label>
           <div className="relative mt-1.5 flex items-center">
             <Mail
               size={16}
-              className="absolute left-3.5 text-[#A1A1AA]"
+              className="absolute left-3.5 text-[#6B5D73]"
             />
             <input
               id="login-email"
@@ -120,7 +120,7 @@ function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="votre.email@domaine.ga"
-              className="w-full rounded-xl border border-white/10 bg-[#0B0B0D] py-3 pl-10 pr-3 text-xs text-[#FAFAF9] placeholder-[#A1A1AA]/50 transition focus:border-[#D4AF37] focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
+              className="w-full rounded-xl border border-[#F0E6F3] bg-[#FAF9FB] py-3 pl-10 pr-3 text-xs text-[#1D0F24] placeholder-[#6B5D73]/50 transition focus:border-up-500 focus:outline-none focus:ring-1 focus:ring-up-500"
             />
           </div>
         </div>
@@ -129,7 +129,7 @@ function LoginForm() {
           <div className="flex items-center justify-between">
             <label
               htmlFor="login-password"
-              className="block text-[11px] font-semibold uppercase tracking-wider text-[#D4AF37]"
+              className="block text-[11px] font-semibold uppercase tracking-wider text-up-700"
             >
               Mot de passe
             </label>
@@ -137,7 +137,7 @@ function LoginForm() {
           <div className="relative mt-1.5 flex items-center">
             <Lock
               size={16}
-              className="absolute left-3.5 text-[#A1A1AA]"
+              className="absolute left-3.5 text-[#6B5D73]"
             />
             <input
               id="login-password"
@@ -146,7 +146,7 @@ function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••••"
-              className="w-full rounded-xl border border-white/10 bg-[#0B0B0D] py-3 pl-10 pr-3 text-xs text-[#FAFAF9] placeholder-[#A1A1AA]/50 transition focus:border-[#D4AF37] focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
+              className="w-full rounded-xl border border-[#F0E6F3] bg-[#FAF9FB] py-3 pl-10 pr-3 text-xs text-[#1D0F24] placeholder-[#6B5D73]/50 transition focus:border-up-500 focus:outline-none focus:ring-1 focus:ring-up-500"
             />
           </div>
         </div>
@@ -154,11 +154,11 @@ function LoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#D4AF37] py-3.5 text-xs font-bold text-[#0B0B0D] transition-all hover:bg-[#F1D875] hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] disabled:opacity-50"
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-up-500 text-white hover:bg-up-600 shadow-md shadow-up-500/20 active:scale-[0.98] py-3.5 text-xs font-bold transition-all disabled:opacity-50"
         >
           {isLoading ? (
             <span className="flex items-center gap-2">
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#0B0B0D] border-t-transparent" />
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
               Connexion en cours...
             </span>
           ) : (
@@ -170,20 +170,20 @@ function LoginForm() {
         </button>
       </form>
 
-      <div className="mt-6 border-t border-white/10 pt-4 text-center">
-        <p className="text-xs text-[#A1A1AA]">
+      <div className="mt-6 border-t border-[#F0E6F3] pt-4 text-center">
+        <p className="text-xs text-[#6B5D73]">
           Pas encore de compte ?{" "}
           <Link
             href="/auth/signup"
-            className="font-semibold text-[#D4AF37] hover:underline"
+            className="font-semibold text-up-600 hover:underline"
           >
             Créer un compte
           </Link>
         </p>
       </div>
 
-      <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] text-[#A1A1AA]/70">
-        <ShieldCheck size={13} className="text-[#22C55E]" />
+      <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] text-[#6B5D73]">
+        <ShieldCheck size={13} className="text-emerald-600" />
         <span>Connexion sécurisée SSL 256-bit · UP Gabon</span>
       </div>
     </div>
@@ -192,10 +192,10 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center bg-[#0B0B0D] px-4 py-12">
+    <div className="min-h-dvh flex flex-col items-center justify-center bg-[#FAF9FB] px-4 py-12">
       <Suspense
         fallback={
-          <div className="h-96 w-full max-w-md rounded-3xl border border-white/10 bg-[#151518] animate-pulse" />
+          <div className="h-96 w-full max-w-md rounded-3xl border border-[#F0E6F3] bg-white animate-pulse" />
         }
       >
         <LoginForm />

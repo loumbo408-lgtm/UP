@@ -31,22 +31,3 @@ export interface MissionReviewRecord {
 export const globalEscrowStore = new Map<string, EscrowTransactionRecord>();
 export const globalMissionReviews = new Map<string, MissionReviewRecord[]>();
 
-// Helper to seed a demo mission for testing
-if (!globalEscrowStore.has("demo-mission")) {
-  globalEscrowStore.set("demo-mission", {
-    id: "tx-demo-1",
-    transactionRef: "UP-ESCROW-20260830-AIRTEL-DEMO",
-    missionId: "demo-mission",
-    companionId: "awa-n",
-    paymentOperator: "airtel_money",
-    phoneNumber: "+241 074 12 34 56",
-    companionFeeXaf: 75000,
-    platformFeeXaf: 7500,
-    totalAmountXaf: 82500,
-    status: "held",
-    otpCode: "4829",
-    heldAt: new Date().toISOString(),
-    settledAt: null,
-    ussdPromptSent: true,
-  });
-}

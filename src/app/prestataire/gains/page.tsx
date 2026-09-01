@@ -34,27 +34,27 @@ export default function GainsPage() {
   return (
     <div className="max-w-xl mx-auto px-4 pt-4 pb-12">
       <div className="px-1 py-3 text-center">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#D4AF37]">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-up-200 bg-up-50 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-up-700">
           <Sparkles size={13} />
           Espace Prestataire
         </span>
-        <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-[#FAFAF9]">
+        <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-[#1D0F24]">
           Mes Gains &amp; Versements
         </h1>
-        <p className="mt-1 text-xs text-[#A1A1AA]">
+        <p className="mt-1 text-xs text-[#6B5D73]">
           Honoraires libérés après validation de fin de mission par code OTP.
         </p>
       </div>
 
       {/* Carte du Solde */}
-      <div className="mt-6 rounded-[28px] border border-[rgba(212,175,55,0.3)] bg-gradient-to-br from-[#D4AF37]/20 via-[#151518] to-[#151518] p-6 shadow-2xl">
-        <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[#D4AF37]">
+      <div className="mt-6 rounded-3xl border border-[#F0E6F3] bg-white p-6 shadow-xs">
+        <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-up-700">
           <Wallet size={15} />
           Solde disponible
         </span>
-        <p className="mt-2 font-display text-4xl font-bold text-[#FAFAF9]">
+        <p className="mt-2 font-display text-4xl font-bold text-[#1D0F24]">
           {hydrated ? balance.toLocaleString("fr-FR") : "96 000"}{" "}
-          <span className="text-base font-normal text-[#A1A1AA]">FCFA</span>
+          <span className="text-base font-normal text-[#6B5D73]">FCFA</span>
         </p>
 
         <button
@@ -63,7 +63,7 @@ export default function GainsPage() {
             setIsWithdrawOpen(true);
             setWithdrawSuccess(null);
           }}
-          className="mt-5 inline-flex items-center gap-1.5 rounded-2xl bg-[#D4AF37] px-6 py-3 text-xs font-bold text-[#0B0B0D] transition hover:bg-[#F1D875] hover:shadow-[0_0_20px_rgba(212,175,55,0.4)]"
+          className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-up-500 text-white hover:bg-up-600 shadow-md shadow-up-500/20 active:scale-[0.98] px-6 py-3 text-xs font-bold transition"
         >
           <span>Retirer vers Mobile Money</span>
           <ArrowUpRight size={15} />
@@ -72,7 +72,7 @@ export default function GainsPage() {
 
       {/* Historique des mouvements */}
       <div className="mt-8">
-        <h2 className="font-display text-sm font-bold uppercase tracking-wider text-[#A1A1AA] px-1">
+        <h2 className="font-display text-sm font-bold uppercase tracking-wider text-[#6B5D73] px-1">
           Historique des transactions
         </h2>
 
@@ -80,15 +80,15 @@ export default function GainsPage() {
           {gains.map((l) => (
             <div
               key={l.id}
-              className="flex items-center justify-between rounded-2xl border border-white/10 bg-[#151518] p-4 shadow-md"
+              className="flex items-center justify-between rounded-2xl border border-[#F0E6F3] bg-white p-4 shadow-xs"
             >
               <div>
-                <p className="text-xs font-bold text-[#FAFAF9]">{l.label}</p>
-                <p className="text-[11px] text-[#A1A1AA]">{l.date}</p>
+                <p className="text-xs font-bold text-[#1D0F24]">{l.label}</p>
+                <p className="text-[11px] text-[#6B5D73]">{l.date}</p>
               </div>
               <span
                 className={`font-mono text-xs font-bold ${
-                  l.montant.startsWith("+") ? "text-[#D4AF37]" : "text-[#A1A1AA]"
+                  l.montant.startsWith("+") ? "text-emerald-600" : "text-[#6B5D73]"
                 }`}
               >
                 {l.montant} FCFA
@@ -100,17 +100,17 @@ export default function GainsPage() {
 
       {/* Modal de Retrait Mobile Money */}
       {isWithdrawOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-5 backdrop-blur-md animate-in fade-in">
-          <div className="w-full max-w-sm rounded-[28px] border border-[rgba(212,175,55,0.3)] bg-[#151518] p-6 text-center shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#D4AF37]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1D0F24]/60 p-5 backdrop-blur-md animate-in fade-in">
+          <div className="w-full max-w-sm rounded-3xl border border-[#F0E6F3] bg-white p-6 text-center shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#F0E6F3] pb-3">
+              <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-up-700">
                 <Wallet size={16} />
                 Retrait Rapide
               </span>
               <button
                 type="button"
                 onClick={() => setIsWithdrawOpen(false)}
-                className="text-[#A1A1AA] hover:text-[#FAFAF9]"
+                className="text-[#6B5D73] hover:text-[#1D0F24]"
               >
                 <X size={18} />
               </button>
@@ -118,17 +118,17 @@ export default function GainsPage() {
 
             {withdrawSuccess ? (
               <div className="my-5 text-center space-y-3">
-                <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#22C55E]/20 text-[#22C55E]">
+                <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-50 text-emerald-600">
                   <CheckCircle2 size={30} />
                 </span>
-                <h3 className="font-display text-lg font-bold text-[#FAFAF9]">
+                <h3 className="font-display text-lg font-bold text-[#1D0F24]">
                   Transfert Réussi
                 </h3>
-                <p className="text-xs text-[#A1A1AA]">{withdrawSuccess}</p>
+                <p className="text-xs text-[#6B5D73]">{withdrawSuccess}</p>
                 <button
                   type="button"
                   onClick={() => setIsWithdrawOpen(false)}
-                  className="mt-4 w-full rounded-xl bg-[#D4AF37] py-3 text-xs font-bold text-[#0B0B0D]"
+                  className="mt-4 w-full rounded-full bg-up-500 text-white hover:bg-up-600 py-3 text-xs font-bold shadow-md shadow-up-500/20"
                 >
                   Fermer
                 </button>
@@ -136,7 +136,7 @@ export default function GainsPage() {
             ) : (
               <form onSubmit={handleWithdraw} className="mt-4 space-y-4 text-left">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#D4AF37]">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-up-700">
                     Opérateur Mobile Money
                   </label>
                   <div className="mt-2 grid grid-cols-2 gap-2">
@@ -145,8 +145,8 @@ export default function GainsPage() {
                       onClick={() => setOperator("airtel_money")}
                       className={`rounded-2xl border p-3 text-center text-xs font-bold transition ${
                         operator === "airtel_money"
-                          ? "border-red-500 bg-red-950/40 text-[#FAFAF9]"
-                          : "border-white/10 bg-[#0B0B0D] text-[#A1A1AA]"
+                          ? "border-up-500 bg-up-50 text-up-700"
+                          : "border-[#F0E6F3] bg-[#FAF9FB] text-[#6B5D73]"
                       }`}
                     >
                       Airtel Money
@@ -156,8 +156,8 @@ export default function GainsPage() {
                       onClick={() => setOperator("moov_money")}
                       className={`rounded-2xl border p-3 text-center text-xs font-bold transition ${
                         operator === "moov_money"
-                          ? "border-cyan-500 bg-cyan-950/40 text-[#FAFAF9]"
-                          : "border-white/10 bg-[#0B0B0D] text-[#A1A1AA]"
+                          ? "border-up-500 bg-up-50 text-up-700"
+                          : "border-[#F0E6F3] bg-[#FAF9FB] text-[#6B5D73]"
                       }`}
                     >
                       Moov Money
@@ -168,12 +168,12 @@ export default function GainsPage() {
                 <div>
                   <label
                     htmlFor="withdraw-phone-input"
-                    className="block text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]"
+                    className="block text-xs font-semibold uppercase tracking-wider text-[#6B5D73]"
                   >
                     Numéro de réception
                   </label>
                   <div className="relative mt-1 flex items-center">
-                    <span className="absolute left-3 text-xs text-[#A1A1AA] font-bold">
+                    <span className="absolute left-3 text-xs text-[#6B5D73] font-bold">
                       +241
                     </span>
                     <input
@@ -182,7 +182,7 @@ export default function GainsPage() {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       required
-                      className="w-full rounded-xl border border-white/10 bg-[#0B0B0D] py-2.5 pl-14 pr-3 text-xs text-[#FAFAF9] focus:border-[#D4AF37] focus:outline-none"
+                      className="w-full rounded-xl border border-[#F0E6F3] bg-[#FAF9FB] py-2.5 pl-14 pr-3 text-xs text-[#1D0F24] focus:border-up-500 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -190,7 +190,7 @@ export default function GainsPage() {
                 <div>
                   <label
                     htmlFor="withdraw-amount-field"
-                    className="block text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]"
+                    className="block text-xs font-semibold uppercase tracking-wider text-[#6B5D73]"
                   >
                     Montant à retirer (FCFA)
                   </label>
@@ -202,7 +202,7 @@ export default function GainsPage() {
                     max={balance}
                     min={1000}
                     required
-                    className="mt-1 w-full rounded-xl border border-white/10 bg-[#0B0B0D] p-2.5 text-xs text-[#FAFAF9] focus:border-[#D4AF37] focus:outline-none"
+                    className="mt-1 w-full rounded-xl border border-[#F0E6F3] bg-[#FAF9FB] p-2.5 text-xs text-[#1D0F24] focus:border-up-500 focus:outline-none"
                   />
                 </div>
 
@@ -210,14 +210,14 @@ export default function GainsPage() {
                   <button
                     type="button"
                     onClick={() => setIsWithdrawOpen(false)}
-                    className="flex-1 rounded-xl border border-white/10 py-3 text-xs font-medium text-[#A1A1AA] hover:text-[#FAFAF9]"
+                    className="flex-1 rounded-full border border-[#F0E6F3] py-3 text-xs font-medium text-[#6B5D73] hover:text-[#1D0F24]"
                   >
                     Annuler
                   </button>
                   <button
                     type="submit"
                     disabled={isProcessing || parseInt(amount, 10) > balance}
-                    className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[#D4AF37] py-3 text-xs font-bold text-[#0B0B0D] hover:bg-[#F1D875] disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-1.5 rounded-full bg-up-500 text-white hover:bg-up-600 shadow-md shadow-up-500/20 active:scale-[0.98] py-3 text-xs font-bold disabled:opacity-50"
                   >
                     {isProcessing ? (
                       <RefreshCw size={14} className="animate-spin" />

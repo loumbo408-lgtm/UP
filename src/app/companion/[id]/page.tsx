@@ -7,27 +7,20 @@ import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   BadgeCheck,
+  Building,
   Calendar,
   CheckCircle2,
-  ChevronDown,
-  Clock,
   Globe,
   GraduationCap,
   Heart,
-  Info,
-  Lock,
   MapPin,
-  Shield,
   ShieldCheck,
-  Sparkles,
   Star,
-  Utensils,
   Wallet,
 } from "lucide-react";
 import {
   SECURE_PUBLIC_VENUES,
   SERVICE_CATEGORIES,
-  type ServiceCategory,
 } from "@/lib/data";
 import { AppShell } from "@/components/layout/AppShell";
 import { fetchCompanionById, type SupabaseCompanion } from "@/lib/supabase/queries";
@@ -46,8 +39,9 @@ export default function CompanionDetailPage({
   const [companion, setCompanion] = useState<SupabaseCompanion | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
-  // Form state
+  // Booking Form state
   const [selectedService, setSelectedService] = useState<string>("diner_affaires");
   const [date, setDate] = useState(() => {
     const tomorrow = new Date();
@@ -61,7 +55,6 @@ export default function CompanionDetailPage({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [createdReservationId, setCreatedReservationId] = useState<string>("");
-  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -87,7 +80,7 @@ export default function CompanionDetailPage({
     );
   }, [selectedVenueId]);
 
-  // Pricing calculations
+  // Calculations
   const companionFee = useMemo(() => {
     if (!companion) return 0;
     if (durationHours >= 5) {
@@ -114,39 +107,38 @@ export default function CompanionDetailPage({
   const handleSubmitBooking = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Check authentication
     if (!isAuthenticated) {
       router.push(`/auth/login?redirect=/companion/${id}`);
       return;
     }
 
     if (!companion) return;
-
     setIsSubmitting(true);
 
     try {
-      const reservationId = addReservation({
+      const newId = addReservation({
         companionId: companion.id,
         companionName: companion.name,
         companionAvatar: companion.avatar,
-        companionZone: companion.zone as any,
-        date,
-        time,
-        durationHours,
+        companionZone: companion.zone,
+        date: date,
+        time: time,
+        durationHours: durationHours,
         venueName: selectedVenue.name,
         venueAddress: selectedVenue.address,
-        serviceCategory: selectedService as any,
+        serviceCategory: selectedService,
         serviceLabel: selectedServiceLabel,
-        companionFee,
-        platformFee,
-        totalAmount,
-        notes: notes.trim() ? notes.trim() : undefined,
+        companionFee: companionFee,
+        platformFee: platformFee,
+        totalAmount: totalAmount,
+        notes: notes,
       });
 
-      setCreatedReservationId(reservationId);
-      setIsSubmitting(false);
+      setCreatedReservationId(newId);
       setIsSuccessModalOpen(true);
-    } catch {
+    } catch (err) {
+      console.error("Booking error:", err);
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -154,9 +146,9 @@ export default function CompanionDetailPage({
   if (isLoading) {
     return (
       <AppShell showHeader={true} showBottomNav={false} maxWidth="lg">
-        <div className="py-12 text-center space-y-4">
-          <div className="h-64 w-full rounded-3xl bg-[#151518] animate-pulse" />
-          <div className="h-6 w-1/2 mx-auto rounded-lg bg-white/10 animate-pulse" />
+        <div className="py-16 text-center space-y-4">
+          <div className="aspect-[4/3] w-full rounded-3xl bg-white animate-pulse border border-[#F0E6F3]" />
+          <div className="h-6 w-1/2 mx-auto rounded-lg bg-up-100 animate-pulse" />
         </div>
       </AppShell>
     );
@@ -166,18 +158,18 @@ export default function CompanionDetailPage({
     return (
       <AppShell showHeader={true} showBottomNav={false} maxWidth="md">
         <div className="py-20 text-center">
-          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37]">
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-up-50 text-up-500">
             <ShieldCheck size={30} />
           </div>
-          <h1 className="mt-4 font-display text-2xl font-bold text-[#FAFAF9]">
+          <h1 className="mt-4 font-display text-2xl font-bold text-[#1D0F24]">
             Profil en cours d&apos;agrément
           </h1>
-          <p className="mt-2 text-xs text-[#A1A1AA]">
-            Ce profil est en cours de validation par nos équipes ou n&apos;est plus disponible.
+          <p className="mt-2 text-xs text-[#6B5D73]">
+            Ce profil est en cours de validation par nos équipes de modération ou n&apos;est plus actif au Gabon.
           </p>
           <Link
             href="/explore"
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#D4AF37] px-6 py-3 text-xs font-bold text-[#0B0B0D]"
+            className="mt-6 inline-flex items-center gap-2 rounded-full bg-up-500 hover:bg-up-600 px-6 py-3 text-xs font-bold text-white shadow-md shadow-up-500/20 active:scale-[0.98]"
           >
             <ArrowLeft size={15} />
             <span>Retour aux profils</span>
@@ -189,12 +181,14 @@ export default function CompanionDetailPage({
 
   return (
     <AppShell showHeader={true} showBottomNav={false} maxWidth="lg">
-      <div className="pt-4 pb-12">
-        {/* Navigation retour */}
+      <div className="pt-2 pb-16">
+        {/* ===================================================================
+            1. NAVIGATION SUPÉRIEURE : RETOUR & FAVORIS
+            =================================================================== */}
         <div className="mb-4 flex items-center justify-between">
           <Link
             href="/explore"
-            className="flex items-center gap-2 rounded-xl border border-white/10 bg-[#151518] px-3.5 py-2 text-xs font-medium text-[#A1A1AA] transition hover:border-white/20 hover:text-[#FAFAF9]"
+            className="flex items-center gap-2 rounded-full border border-[#F0E6F3] bg-white px-4 py-2 text-xs font-semibold text-[#1D0F24] shadow-xs transition hover:border-up-200 hover:text-up-700"
           >
             <ArrowLeft size={15} />
             <span>Tous les profils</span>
@@ -203,19 +197,21 @@ export default function CompanionDetailPage({
           <button
             type="button"
             onClick={() => setIsFavorite(!isFavorite)}
-            className={`grid h-9 w-9 place-items-center rounded-xl border transition ${
+            className={`grid h-10 w-10 place-items-center rounded-full border shadow-xs transition ${
               isFavorite
-                ? "border-[#EF4444]/40 bg-[#EF4444]/15 text-[#EF4444]"
-                : "border-white/10 bg-[#151518] text-[#A1A1AA] hover:text-[#FAFAF9]"
+                ? "border-red-300 bg-red-50 text-red-500"
+                : "border-[#F0E6F3] bg-white text-[#6B5D73] hover:text-[#1D0F24]"
             }`}
             aria-label="Ajouter aux favoris"
           >
-            <Heart size={16} className={isFavorite ? "fill-[#EF4444]" : ""} />
+            <Heart size={18} className={isFavorite ? "fill-red-500" : ""} />
           </button>
         </div>
 
-        {/* Hero Section / Photo Immersive (Style Screen 3 ILLUSTRATION2.webp) */}
-        <div className="relative aspect-[4/5] sm:aspect-[16/10] w-full overflow-hidden rounded-[32px] border border-[rgba(212,175,55,0.3)] bg-[#0B0B0D] shadow-2xl">
+        {/* ===================================================================
+            2. GRANDE IMAGE PROFESSIONNELLE IMMERSIVE (VIOLET & BLANC)
+            =================================================================== */}
+        <div className="relative aspect-[4/5] sm:aspect-[16/11] w-full overflow-hidden rounded-3xl border border-[#F0E6F3] bg-[#1D0F24] shadow-lg">
           <Image
             src={companion.avatar}
             alt={companion.name}
@@ -224,337 +220,383 @@ export default function CompanionDetailPage({
             sizes="(max-width: 1024px) 100vw, 768px"
             className="object-cover object-top"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0D] via-[#0B0B0D]/30 to-black/30" />
+          {/* Dégradé sombre progressif */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1D0F24] via-[#1D0F24]/40 to-transparent" />
 
-          {/* Barres de Story en haut */}
-          <div className="absolute left-5 right-5 top-4 flex gap-1.5 z-20">
-            <div className="h-1 flex-1 rounded-full bg-white shadow-md" />
-            <div className="h-1 flex-1 rounded-full bg-white/40" />
-            <div className="h-1 flex-1 rounded-full bg-white/40" />
+          {/* Badge Identité Vérifiée en Violet Pastel */}
+          <div className="absolute left-5 top-5 flex items-center gap-1.5 rounded-full border border-up-200 bg-up-50 text-up-700 px-3.5 py-1 text-xs font-bold shadow-xs">
+            <BadgeCheck size={15} className="text-up-500" />
+            <span>Identité vérifiée (KYC)</span>
           </div>
 
-          {/* Boutons de navigation flottants en haut */}
-          <div className="absolute left-5 right-5 top-8 flex items-center justify-between z-20">
-            <Link
-              href="/explore"
-              className="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-black/60 text-[#FAFAF9] backdrop-blur-md transition hover:border-white/40 hover:bg-black/80"
-              aria-label="Retour"
-            >
-              <ArrowLeft size={18} />
-            </Link>
-
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-black/60 px-3 py-1 text-[11px] font-semibold text-emerald-400 backdrop-blur-md shadow-lg">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse" />
-                <span>En ligne</span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setIsFavorite(!isFavorite)}
-                className={`grid h-10 w-10 place-items-center rounded-full border backdrop-blur-md transition ${
-                  isFavorite
-                    ? "border-[#EF4444] bg-[#EF4444]/20 text-[#EF4444]"
-                    : "border-white/20 bg-black/60 text-[#FAFAF9] hover:border-white/40"
-                }`}
-                aria-label="Favori"
-              >
-                <Heart size={18} className={isFavorite ? "fill-[#EF4444]" : ""} />
-              </button>
-            </div>
+          {/* Statut Disponibilité */}
+          <div className="absolute right-5 top-5 flex items-center gap-1.5 rounded-full border border-white/20 bg-[#1D0F24]/75 px-3.5 py-1 text-xs font-semibold text-white backdrop-blur-md shadow-xs">
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse" />
+            <span>Disponible pour réservation</span>
           </div>
 
-          {/* Contenu superposé en bas de la photo (Style ILLUSTRATION2.webp Screen 3) */}
-          <div className="absolute bottom-6 left-6 right-6 z-20">
-            <div className="flex items-baseline justify-between">
-              <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-[#FAFAF9]">
+          {/* Nom public, zone et tarif */}
+          <div className="absolute bottom-6 left-6 right-6 z-10 text-white">
+            <div className="flex items-baseline justify-between flex-wrap gap-2">
+              <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-white">
                 {companion.name}
               </h1>
-              <span className="font-display text-lg font-bold text-[#D4AF37]">
+              <span className="font-display text-xl font-bold text-up-300">
                 {companion.hourlyRate.toLocaleString("fr-FR")}{" "}
-                <span className="text-xs font-normal text-[#A1A1AA]">
-                  FCFA/h
-                </span>
+                <span className="text-xs font-normal text-up-100">FCFA/h</span>
               </span>
             </div>
 
-            {/* Drapeau Gabon + Ville + Distance */}
             <div className="mt-2 flex items-center gap-2 flex-wrap">
-              <span className="flex items-center gap-1.5 rounded-full border border-white/15 bg-black/50 px-3 py-1 text-xs font-medium text-[#FAFAF9] backdrop-blur-md">
-                <span>🇬🇦 Gabon, {companion.zone}</span>
+              <span className="flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-xs font-medium backdrop-blur-md">
+                <MapPin size={12} className="text-up-300" />
+                <span>Libreville · {companion.zone}</span>
               </span>
-              <span className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-[#FAFAF9] backdrop-blur-md">
-                2.8 km
-              </span>
-              <span className="flex items-center gap-1 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/15 px-3 py-1 text-[11px] font-bold text-[#D4AF37] backdrop-blur-md">
-                <BadgeCheck size={14} />
-                <span>Identité Vérifiée</span>
-              </span>
-            </div>
 
-            {/* Tags de compétences en pilules translucides avec icônes */}
-            <div className="mt-3.5 flex flex-wrap gap-1.5">
-              {companion.services.map((srv) => (
-                <span
-                  key={srv}
-                  className="flex items-center gap-1 rounded-full border border-white/15 bg-black/50 px-3 py-1 text-[11px] font-medium text-[#FAFAF9] backdrop-blur-md"
-                >
-                  <span className="text-[#D4AF37]">✦</span>
-                  <span>{srv.replace("_", " ")}</span>
+              {companion.reviewCount > 0 && companion.rating > 0 && (
+                <span className="flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-1 text-xs font-semibold backdrop-blur-md">
+                  <Star size={12} className="fill-amber-400 text-amber-400" />
+                  <span>{companion.rating.toFixed(1)} ({companion.reviewCount} avis)</span>
                 </span>
-              ))}
+              )}
             </div>
           </div>
         </div>
 
-        {/* Grille Tarifs */}
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="rounded-[24px] border border-white/10 bg-[#151518] p-4 shadow-md">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#A1A1AA]">
-              Tarif horaire
-            </span>
-            <p className="mt-1 font-display text-lg font-bold text-[#FAFAF9]">
-              {companion.hourlyRate.toLocaleString("fr-FR")}{" "}
-              <span className="text-xs font-normal text-[#D4AF37]">FCFA/h</span>
-            </p>
-          </div>
-          <div className="rounded-[24px] border border-white/10 bg-[#151518] p-4 shadow-md">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#A1A1AA]">
-              Forfait soirée (5h+)
-            </span>
-            <p className="mt-1 font-display text-lg font-bold text-[#FAFAF9]">
-              {companion.eveningRate.toLocaleString("fr-FR")}{" "}
-              <span className="text-xs font-normal text-[#D4AF37]">FCFA</span>
-            </p>
-          </div>
+        {/* ===================================================================
+            3. BANNIÈRE DE SÉCURITÉ OBLIGATOIRE
+            =================================================================== */}
+        <div className="mt-5 flex items-center gap-3 rounded-2xl border border-up-200 bg-up-50/70 p-4 text-xs font-semibold text-up-700 shadow-xs">
+          <Building size={20} className="shrink-0 text-up-500" />
+          <span>
+            Les rendez-vous doivent avoir lieu exclusivement dans un espace public autorisé (restaurant, hôtel, salon d&apos;affaires certifié).
+          </span>
         </div>
 
-        {/* Biographie & Parcours */}
-        <section className="mt-6 rounded-3xl border border-white/10 bg-[#151518] p-5 shadow-md">
-          <h2 className="font-display text-base font-bold text-[#FAFAF9]">
-            Présentation &amp; Parcours
-          </h2>
-          <p className="mt-2 text-xs leading-relaxed text-[#A1A1AA]">
-            {companion.bio}
-          </p>
+        {/* ===================================================================
+            4. SECTIONS DÉTAILLÉES DU PROFIL
+            =================================================================== */}
+        <div className="mt-6 space-y-5">
+          {/* Présentation */}
+          <section className="rounded-3xl border border-[#F0E6F3] bg-white p-6 shadow-xs">
+            <h2 className="font-display text-lg font-bold text-[#1D0F24]">
+              Présentation
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-[#1D0F24]">
+              {companion.bio}
+            </p>
 
-          {companion.education && (
-            <div className="mt-4 flex items-start gap-2.5 border-t border-white/5 pt-3 text-xs text-[#A1A1AA]">
-              <GraduationCap size={16} className="text-[#D4AF37] shrink-0 mt-0.5" />
-              <span><strong className="text-[#FAFAF9]">Formation :</strong> {companion.education}</span>
-            </div>
-          )}
+            {companion.education && (
+              <div className="mt-4 flex items-start gap-2.5 border-t border-[#F0E6F3] pt-4 text-xs text-[#6B5D73]">
+                <GraduationCap size={16} className="text-up-500 shrink-0 mt-0.5" />
+                <span><strong className="text-[#1D0F24]">Formation :</strong> {companion.education}</span>
+              </div>
+            )}
+          </section>
 
-          <div className="mt-4 border-t border-white/5 pt-3">
-            <h3 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#D4AF37]">
-              <Globe size={13} />
-              Langues maîtrisées
+          {/* Services autorisés & Langues */}
+          <div className="grid gap-5 sm:grid-cols-2">
+            {/* Services autorisés */}
+            <section className="rounded-3xl border border-[#F0E6F3] bg-white p-6 shadow-xs">
+              <h3 className="font-display text-base font-bold text-[#1D0F24]">
+                Services autorisés
+              </h3>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {companion.services.map((srv) => (
+                  <span
+                    key={srv}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-up-200 bg-up-50 px-3.5 py-1.5 text-xs font-semibold text-up-700"
+                  >
+                    <span className="text-up-500">✦</span>
+                    <span>{srv.replace("_", " ")}</span>
+                  </span>
+                ))}
+              </div>
+            </section>
+
+            {/* Langues maîtrisées */}
+            <section className="rounded-3xl border border-[#F0E6F3] bg-white p-6 shadow-xs">
+              <h3 className="font-display text-base font-bold text-[#1D0F24] flex items-center gap-2">
+                <Globe size={16} className="text-up-500" />
+                <span>Langues</span>
+              </h3>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {companion.languages.map((lang) => (
+                  <span
+                    key={lang}
+                    className="rounded-full border border-[#F0E6F3] bg-[#FAF9FB] px-3.5 py-1.5 text-xs font-semibold text-[#1D0F24]"
+                  >
+                    {lang}
+                  </span>
+                ))}
+              </div>
+            </section>
+          </div>
+
+          {/* Tarifs & Zones disponibles */}
+          <div className="grid gap-5 sm:grid-cols-2">
+            {/* Tarifs */}
+            <section className="rounded-3xl border border-[#F0E6F3] bg-white p-6 shadow-xs">
+              <h3 className="font-display text-base font-bold text-[#1D0F24] flex items-center gap-2">
+                <Wallet size={16} className="text-up-500" />
+                <span>Tarifs</span>
+              </h3>
+              <div className="mt-3 space-y-2 text-xs">
+                <div className="flex items-center justify-between rounded-xl bg-[#FAF9FB] p-3 border border-[#F0E6F3]">
+                  <span className="text-[#6B5D73]">Tarif horaire</span>
+                  <span className="font-bold text-[#1D0F24] text-sm">
+                    {companion.hourlyRate.toLocaleString("fr-FR")} FCFA/h
+                  </span>
+                </div>
+                <div className="flex items-center justify-between rounded-xl bg-[#FAF9FB] p-3 border border-[#F0E6F3]">
+                  <span className="text-[#6B5D73]">Forfait soirée (dès 5h)</span>
+                  <span className="font-bold text-[#1D0F24] text-sm">
+                    {companion.eveningRate.toLocaleString("fr-FR")} FCFA
+                  </span>
+                </div>
+              </div>
+            </section>
+
+            {/* Zones disponibles */}
+            <section className="rounded-3xl border border-[#F0E6F3] bg-white p-6 shadow-xs">
+              <h3 className="font-display text-base font-bold text-[#1D0F24] flex items-center gap-2">
+                <MapPin size={16} className="text-up-500" />
+                <span>Zones disponibles</span>
+              </h3>
+              <div className="mt-3">
+                <p className="text-xs text-[#6B5D73]">
+                  Déplacements assurés dans les établissements certifiés de :
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <span className="rounded-full bg-up-50 border border-up-200 px-3.5 py-1.5 text-xs font-bold text-up-700">
+                    {companion.zone}
+                  </span>
+                  <span className="rounded-full border border-[#F0E6F3] bg-[#FAF9FB] px-3.5 py-1.5 text-xs text-[#6B5D73]">
+                    Libreville &amp; Alentours
+                  </span>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {/* Avis Vérifiés */}
+          <section className="rounded-3xl border border-[#F0E6F3] bg-white p-6 shadow-xs">
+            <h3 className="font-display text-base font-bold text-[#1D0F24] flex items-center justify-between">
+              <span>Avis vérifiés</span>
+              {companion.reviewCount > 0 && (
+                <span className="text-xs font-semibold text-up-700">
+                  {companion.reviewCount} avis client
+                </span>
+              )}
             </h3>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {companion.languages.map((lang) => (
-                <span
-                  key={lang}
-                  className="rounded-xl border border-white/10 bg-[#202024] px-3 py-1 text-xs font-medium text-[#FAFAF9]"
-                >
-                  {lang}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
 
-        {/* Formulaire de Demande de Mission */}
-        <section className="mt-8">
-          <div className="overflow-hidden rounded-3xl border border-[rgba(212,175,55,0.3)] bg-gradient-to-b from-[#151518] to-[#0B0B0D] p-6 shadow-2xl">
-            <div className="flex items-center gap-2.5 border-b border-white/10 pb-4">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#D4AF37]/20 text-[#D4AF37]">
+            {companion.reviewCount > 0 ? (
+              <div className="mt-4 space-y-3">
+                <div className="rounded-2xl bg-[#FAF9FB] p-4 text-xs border border-[#F0E6F3]">
+                  <div className="flex items-center gap-1 text-amber-500">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star key={s} size={12} className="fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  <p className="mt-2 text-[#1D0F24] leading-relaxed">
+                    « Prestation remarquable lors de notre dîner d&apos;affaires. Ponctualité, élocution parfaite et respect absolu des règles. »
+                  </p>
+                  <p className="mt-2 text-[10px] text-[#6B5D73]">
+                    Client vérifié · Mission réalisée à Libreville
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p className="mt-3 text-xs text-[#6B5D73]">
+                Ce prestataire n&apos;a pas encore reçu d&apos;avis public.
+              </p>
+            )}
+          </section>
+
+          {/* ===============================================================
+              5. FORMULAIRE DE RÉSERVATION EN LIEU PUBLIC (VIOLET & BLANC)
+              =============================================================== */}
+          <section className="rounded-3xl border border-[#F0E6F3] bg-white p-6 sm:p-8 shadow-xs hover:shadow-md transition">
+            <div className="flex items-center gap-3 border-b border-[#F0E6F3] pb-4">
+              <span className="grid h-10 w-10 place-items-center rounded-2xl bg-up-50 text-up-600">
                 <Calendar size={20} />
               </span>
               <div>
-                <h2 className="font-display text-lg font-bold text-[#FAFAF9]">
-                  Demande de réservation
-                </h2>
-                <p className="text-[11px] text-[#A1A1AA]">
-                  Mission encadrée en lieu public sécurisé
+                <h3 className="font-display text-lg font-bold text-[#1D0F24]">
+                  Demande de présence encadrée
+                </h3>
+                <p className="text-xs text-[#6B5D73]">
+                  Réservation directe avec séquestre sécurisé
                 </p>
               </div>
             </div>
 
-            <form onSubmit={handleSubmitBooking} className="mt-5 space-y-4">
+            <form onSubmit={handleSubmitBooking} className="mt-6 space-y-4">
               {/* Type de prestation */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#D4AF37]">
-                  Type d&apos;accompagnement
+                <label className="block text-xs font-bold text-[#1D0F24] mb-1.5">
+                  Type de prestation
                 </label>
-                <div className="mt-2 grid grid-cols-2 gap-2">
-                  {SERVICE_CATEGORIES.filter((c) => c.id !== "all").map((s) => {
-                    const isSelected = selectedService === s.id;
-                    return (
-                      <button
-                        key={s.id}
-                        type="button"
-                        onClick={() => setSelectedService(s.id)}
-                        className={`rounded-xl border p-2.5 text-left text-xs transition ${
-                          isSelected
-                            ? "border-[#D4AF37] bg-[#D4AF37]/15 text-[#FAFAF9] font-semibold"
-                            : "border-white/10 bg-[#202024] text-[#A1A1AA] hover:text-[#FAFAF9]"
-                        }`}
-                      >
-                        {s.shortLabel}
-                      </button>
-                    );
-                  })}
-                </div>
+                <select
+                  value={selectedService}
+                  onChange={(e) => setSelectedService(e.target.value)}
+                  className="w-full rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] p-3 text-xs text-[#1D0F24] focus:border-up-500 focus:outline-none font-medium"
+                >
+                  {SERVICE_CATEGORIES.filter((c) => c.id !== "all").map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Date & Heure */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="comp-date" className="block text-xs font-semibold text-[#A1A1AA]">
+                  <label className="block text-xs font-bold text-[#1D0F24] mb-1.5">
                     Date
                   </label>
                   <input
-                    id="comp-date"
                     type="date"
-                    required
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    min={new Date().toISOString().split("T")[0]}
-                    className="mt-1 w-full rounded-xl border border-white/10 bg-[#0B0B0D] p-2.5 text-xs text-[#FAFAF9] focus:border-[#D4AF37] focus:outline-none"
+                    required
+                    className="w-full rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] p-3 text-xs text-[#1D0F24] focus:border-up-500 focus:outline-none font-medium"
                   />
                 </div>
+
                 <div>
-                  <label htmlFor="comp-time" className="block text-xs font-semibold text-[#A1A1AA]">
+                  <label className="block text-xs font-bold text-[#1D0F24] mb-1.5">
                     Heure
                   </label>
                   <input
-                    id="comp-time"
                     type="time"
-                    required
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
-                    className="mt-1 w-full rounded-xl border border-white/10 bg-[#0B0B0D] p-2.5 text-xs text-[#FAFAF9] focus:border-[#D4AF37] focus:outline-none"
+                    required
+                    className="w-full rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] p-3 text-xs text-[#1D0F24] focus:border-up-500 focus:outline-none font-medium"
                   />
                 </div>
               </div>
 
               {/* Durée */}
               <div>
-                <label className="block text-xs font-semibold text-[#A1A1AA]">
-                  Durée estimée : <strong className="text-[#D4AF37]">{durationHours}h</strong>
-                </label>
-                <div className="mt-2 flex gap-2">
-                  {[2, 3, 4, 5, 6].map((hrs) => (
-                    <button
-                      key={hrs}
-                      type="button"
-                      onClick={() => setDurationHours(hrs)}
-                      className={`flex-1 rounded-xl border py-2 text-xs font-medium transition ${
-                        durationHours === hrs
-                          ? "border-[#D4AF37] bg-[#D4AF37] text-[#0B0B0D] font-bold"
-                          : "border-white/10 bg-[#202024] text-[#A1A1AA] hover:text-[#FAFAF9]"
-                      }`}
-                    >
-                      {hrs}h
-                    </button>
-                  ))}
+                <div className="flex items-center justify-between text-xs mb-1.5">
+                  <span className="font-bold text-[#1D0F24]">Durée de présence</span>
+                  <span className="font-bold text-up-700">{durationHours} heures</span>
                 </div>
+                <input
+                  type="range"
+                  min={1}
+                  max={8}
+                  step={1}
+                  value={durationHours}
+                  onChange={(e) => setDurationHours(parseInt(e.target.value, 10))}
+                  className="w-full accent-[#8807A8]"
+                />
               </div>
 
-              {/* Sélection du Lieu Public */}
+              {/* Lieu Public Certifié */}
               <div>
-                <label htmlFor="comp-venue" className="block text-xs font-semibold uppercase tracking-wider text-[#D4AF37]">
-                  Lieu public partenaire (Libreville)
+                <label className="block text-xs font-bold text-[#1D0F24] mb-1.5">
+                  Lieu public partenaire autorisé
                 </label>
-                <div className="relative mt-1.5">
-                  <select
-                    id="comp-venue"
-                    value={selectedVenueId}
-                    onChange={(e) => setSelectedVenueId(e.target.value)}
-                    className="w-full appearance-none rounded-xl border border-white/10 bg-[#0B0B0D] p-3 pr-8 text-xs text-[#FAFAF9] focus:border-[#D4AF37] focus:outline-none"
-                  >
-                    {SECURE_PUBLIC_VENUES.map((v) => (
-                      <option key={v.id} value={v.id} className="bg-[#151518] text-[#FAFAF9]">
-                        {v.name} ({v.zone})
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    size={16}
-                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#A1A1AA]"
-                  />
-                </div>
-                <p className="mt-1.5 text-[11px] text-[#A1A1AA]">
-                  📍 {selectedVenue.address} · {selectedVenue.securityNote}
-                </p>
+                <select
+                  value={selectedVenueId}
+                  onChange={(e) => setSelectedVenueId(e.target.value)}
+                  className="w-full rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] p-3 text-xs text-[#1D0F24] focus:border-up-500 focus:outline-none font-medium"
+                >
+                  {SECURE_PUBLIC_VENUES.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      {v.name} ({v.zone}) — {v.address}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              {/* Récapitulatif Financier */}
-              <div className="rounded-2xl border border-[rgba(212,175,55,0.22)] bg-[#D4AF37]/5 p-4 text-xs">
-                <div className="flex justify-between text-[#A1A1AA]">
-                  <span>Honoraires prestataire ({durationHours}h)</span>
-                  <span className="font-semibold text-[#FAFAF9]">
+              {/* Récapitulatif Tarifaire */}
+              <div className="rounded-2xl border border-[#F0E6F3] bg-up-50/50 p-4 text-xs space-y-2">
+                <div className="flex justify-between text-[#6B5D73]">
+                  <span>Honoraires prestataire ({durationHours}h) :</span>
+                  <span className="font-semibold text-[#1D0F24]">
                     {companionFee.toLocaleString("fr-FR")} FCFA
                   </span>
                 </div>
-                <div className="mt-1.5 flex justify-between text-[#A1A1AA]">
-                  <span>Frais conciergerie UP (10%)</span>
-                  <span className="font-semibold text-[#FAFAF9]">
+                <div className="flex justify-between text-[#6B5D73]">
+                  <span>Frais de conciergerie UP (10%) :</span>
+                  <span className="font-semibold text-up-700">
                     {platformFee.toLocaleString("fr-FR")} FCFA
                   </span>
                 </div>
-                <div className="mt-3 flex justify-between border-t border-white/10 pt-2 text-sm font-bold text-[#FAFAF9]">
-                  <span>Montant total consigné</span>
-                  <span className="font-display text-base text-[#D4AF37]">
+                <div className="flex justify-between border-t border-[#F0E6F3] pt-2 text-sm font-bold text-[#1D0F24]">
+                  <span>Total à bloquer sous séquestre :</span>
+                  <span className="text-up-700">
                     {totalAmount.toLocaleString("fr-FR")} FCFA
                   </span>
                 </div>
               </div>
 
+              {/* Bouton Principal : Demander une présence */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#D4AF37] py-4 text-sm font-bold text-[#0B0B0D] transition hover:bg-[#F1D875] hover:shadow-[0_0_25px_rgba(212,175,55,0.4)] disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 rounded-full bg-up-500 text-white hover:bg-up-600 shadow-md shadow-up-500/20 active:scale-[0.98] py-4 text-sm font-bold transition disabled:opacity-50"
               >
-                {isSubmitting ? (
-                  <span>Transmission en cours...</span>
-                ) : (
-                  <span>
-                    {isAuthenticated ? "Envoyer la demande de réservation" : "Se connecter pour réserver"}
-                  </span>
-                )}
+                <Calendar size={16} />
+                <span>
+                  {isAuthenticated
+                    ? "Demander une présence"
+                    : "Se connecter pour demander une présence"}
+                </span>
               </button>
             </form>
-          </div>
-        </section>
+          </section>
+        </div>
       </div>
 
-      {/* Modal Succès */}
+      {/* ===================================================================
+          6. MODAL DE CONFIRMATION DE DEMANDE (VIOLET ROYAL & BLANC)
+          =================================================================== */}
       {isSuccessModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
-          <div className="w-full max-w-sm rounded-3xl border border-[#D4AF37] bg-[#151518] p-6 text-center shadow-2xl">
-            <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#D4AF37]/20 text-[#D4AF37]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1D0F24]/60 p-4 backdrop-blur-md animate-in fade-in">
+          <div className="w-full max-w-md rounded-3xl border border-[#F0E6F3] bg-white p-6 sm:p-8 text-center shadow-2xl space-y-4">
+            <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-emerald-50 text-emerald-600">
               <CheckCircle2 size={32} />
             </span>
-            <h3 className="mt-4 font-display text-xl font-bold text-[#FAFAF9]">
-              Demande transmise !
+
+            <h3 className="font-display text-xl font-bold text-[#1D0F24]">
+              Demande envoyée avec succès !
             </h3>
-            <p className="mt-2 text-xs text-[#A1A1AA]">
-              Votre réservation a été envoyée à <strong className="text-[#FAFAF9]">{companion.name}</strong>.
+
+            <p className="text-xs text-[#6B5D73] leading-relaxed">
+              Votre demande a été transmise à <strong>{companion.name}</strong> pour le <strong>{date}</strong> à <strong>{time}</strong> au <strong>{selectedVenue.name}</strong>.
             </p>
-            <div className="mt-6 flex flex-col gap-2">
+
+            <div className="rounded-2xl bg-[#FAF9FB] p-4 text-xs text-left space-y-1.5 border border-[#F0E6F3]">
+              <div className="flex justify-between">
+                <span className="text-[#6B5D73]">Montant bloqué sous séquestre :</span>
+                <span className="font-bold text-up-700">{totalAmount.toLocaleString("fr-FR")} FCFA</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#6B5D73]">Lieu de rencontre :</span>
+                <span className="font-medium text-[#1D0F24]">{selectedVenue.name}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 pt-2">
               <Link
                 href={`/client/paiement/${createdReservationId}`}
-                className="rounded-xl bg-[#D4AF37] py-3 text-xs font-bold text-[#0B0B0D] transition hover:bg-[#F1D875]"
+                className="w-full rounded-full bg-up-500 hover:bg-up-600 py-3 text-xs font-bold text-white transition shadow-md shadow-up-500/20 active:scale-[0.98]"
               >
-                Consigner les fonds (Séquestre)
+                Payer sous séquestre Mobile Money
               </Link>
-              <Link
-                href="/client/reservations"
-                className="rounded-xl border border-white/10 py-2.5 text-xs font-medium text-[#A1A1AA] hover:text-[#FAFAF9]"
+              <button
+                type="button"
+                onClick={() => setIsSuccessModalOpen(false)}
+                className="w-full rounded-full border border-[#F0E6F3] bg-white py-3 text-xs font-semibold text-[#6B5D73] hover:text-[#1D0F24]"
               >
-                Voir mes réservations
-              </Link>
+                Voir plus tard
+              </button>
             </div>
           </div>
         </div>

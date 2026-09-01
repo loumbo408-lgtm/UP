@@ -29,7 +29,7 @@ export function AppShell({
   };
 
   return (
-    <div className="min-h-dvh flex flex-col bg-[#0B0B0D] text-[#FAFAF9]">
+    <div className="min-h-dvh flex flex-col bg-[#F2F6F7] text-[#12211F]">
       {showHeader && <Header />}
 
       <main

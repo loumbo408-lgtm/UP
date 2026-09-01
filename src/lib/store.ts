@@ -126,84 +126,17 @@ type UpState = {
   toggleAdminVenueStatus: (venueId: string) => void;
 };
 
-const INITIAL_RADAR_DEMANDS: RadarDemand[] = [
-  {
-    id: "dem-1",
-    clientName: "M. Ndong (DG Groupe)",
-    clientVerified: true,
-    service: "Dîner d'affaires prestige",
-    date: "Ce soir",
-    time: "20h00",
-    venueName: "Radisson Blu — Restaurant O'Mbali",
-    venueZone: "Batterie IV · 3,8 km",
-    durationHours: 3,
-    netEarnings: 75000,
-    notes: "Délégation d'investisseurs de passage. Tenue de soirée exigée.",
-    status: "pending",
-  },
-  {
-    id: "dem-2",
-    clientName: "Mme Okome",
-    clientVerified: true,
-    service: "Accompagnement vernissage d'art",
-    date: "Samedi",
-    time: "18h30",
-    venueName: "La Voile Rouge Restaurant Lounge",
-    venueZone: "Sablière · 7,5 km",
-    durationHours: 4,
-    netEarnings: 90000,
-    notes: "Vernissage caritatif et cocktail dînatoire.",
-    status: "pending",
-  },
-  {
-    id: "dem-3",
-    clientName: "Dr. Alain M.",
-    clientVerified: true,
-    service: "Discussion & Conseil en Salon",
-    date: "Dimanche",
-    time: "15h00",
-    venueName: "L'Hôtel Nomad — Espace Lounge",
-    venueZone: "Akanda · 5,2 km",
-    durationHours: 2,
-    netEarnings: 50000,
-    notes: "Échange professionnel en salon feutré.",
-    status: "pending",
-  },
-];
-
 export const useUpStore = create<UpState>()(
   persist(
     (set, get) => ({
       role: null,
-      available: true,
-      prestataireBalance: 125000,
-      prestataireGains: [
-        {
-          id: "gain-1",
-          label: "Dîner d'affaires — M. Ndong",
-          date: "28 août",
-          montant: "+ 75 000",
-          rawAmount: 75000,
-        },
-        {
-          id: "gain-2",
-          label: "Assistant protocolaire — Mme Okome",
-          date: "24 août",
-          montant: "+ 90 000",
-          rawAmount: 90000,
-        },
-        {
-          id: "gain-3",
-          label: "Retrait Airtel Money vers +241 074...",
-          date: "20 août",
-          montant: "− 40 000",
-          rawAmount: -40000,
-        },
-      ],
+      available: false,
+      prestataireBalance: 0,
+      prestataireGains: [],
       reservations: [],
-      radarDemands: INITIAL_RADAR_DEMANDS,
+      radarDemands: [],
 
-      // Initial admin records
+      // Données réelles initiales (vides)
       kycApplicants: INITIAL_KYC_APPLICANTS,
       adminEscrows: INITIAL_ADMIN_ESCROWS,
       adminVenues: INITIAL_ADMIN_VENUES,
@@ -218,6 +151,7 @@ export const useUpStore = create<UpState>()(
       clearRole: () => {
         if (typeof document !== "undefined") {
           document.cookie = "up_role=; path=/; max-age=0";
+          document.cookie = "up_admin_session=; path=/; max-age=0";
         }
         set({ role: null });
       },

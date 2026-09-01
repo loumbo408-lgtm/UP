@@ -190,17 +190,18 @@ export default function AdminKycModerationPage() {
   });
 
   return (
-    <main className="px-4 sm:px-6 pt-4 pb-12 space-y-4 max-w-7xl mx-auto">
-      {/* En-tête de la page */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-white/10 pb-4">
+    <main className="min-h-dvh bg-[#FAF9FB] p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+      {/* En-tête */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#F0E6F3] pb-6">
         <div>
-          <span className="text-[10px] uppercase font-bold tracking-widest text-[#D4AF37]">
-            Conformité &amp; Sécurité UP Gabon
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-up-200 bg-up-50 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-up-700">
+            <ShieldCheck size={13} />
+            Espace Sécurité &amp; Contrôle
           </span>
-          <h1 className="font-display text-2xl font-bold text-[#FAFAF9] sm:text-3xl">
+          <h1 className="mt-2 font-display text-2xl font-bold text-[#1D0F24] sm:text-3xl">
             Modération des Identités (KYC)
           </h1>
-          <p className="text-xs text-[#A1A1AA]">
+          <p className="text-xs text-[#6B5D73]">
             Contrôle des pièces d&apos;identité gabonaises et agrément des comptes réels.
           </p>
         </div>
@@ -209,12 +210,12 @@ export default function AdminKycModerationPage() {
           <button
             type="button"
             onClick={loadApplicants}
-            className="flex items-center gap-1.5 rounded-full border border-white/10 bg-[#151518] px-3.5 py-1.5 text-xs font-semibold text-[#A1A1AA] hover:text-[#FAFAF9]"
+            className="flex items-center gap-1.5 rounded-full border border-[#F0E6F3] bg-white px-3.5 py-1.5 text-xs font-semibold text-[#6B5D73] hover:text-[#1D0F24] shadow-xs"
           >
             <RefreshCw size={13} className={isLoading ? "animate-spin" : ""} />
             <span>Actualiser</span>
           </button>
-          <span className="flex items-center gap-1.5 rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/15 px-3 py-1.5 text-xs font-bold text-[#D4AF37]">
+          <span className="flex items-center gap-1.5 rounded-full border border-up-200 bg-up-50 px-3 py-1.5 text-xs font-bold text-up-700">
             <Clock size={13} />
             <span>
               {applicants.filter((a) => a.status === "pending").length} en attente
@@ -225,7 +226,7 @@ export default function AdminKycModerationPage() {
 
       {/* Message de succès */}
       {actionSuccessMsg && (
-        <div className="flex items-center gap-2.5 rounded-2xl border border-[#22C55E]/40 bg-[#22C55E]/10 p-4 text-xs text-[#22C55E] animate-in fade-in">
+        <div className="flex items-center gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-xs text-emerald-700 animate-in fade-in">
           <CheckCircle2 size={18} className="shrink-0" />
           <span>{actionSuccessMsg}</span>
         </div>
@@ -236,18 +237,18 @@ export default function AdminKycModerationPage() {
         <div className="relative flex-1">
           <Search
             size={16}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A1A1AA]"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6B5D73]"
           />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher un candidat par nom, quartier..."
-            className="w-full rounded-2xl border border-white/10 bg-[#151518] py-2.5 pl-10 pr-4 text-xs text-[#FAFAF9] focus:border-[#D4AF37] focus:outline-none"
+            className="w-full rounded-2xl border border-[#F0E6F3] bg-white py-2.5 pl-10 pr-4 text-xs text-[#1D0F24] focus:border-up-500 focus:outline-none shadow-xs"
           />
         </div>
 
-        <div className="flex gap-1.5 rounded-full border border-white/10 bg-[#151518] p-1">
+        <div className="flex gap-1.5 rounded-full border border-[#F0E6F3] bg-white p-1 shadow-xs">
           {(["pending", "verified", "rejected", "all"] as const).map((st) => (
             <button
               key={st}
@@ -255,8 +256,8 @@ export default function AdminKycModerationPage() {
               onClick={() => setFilterStatus(st)}
               className={`rounded-full px-3.5 py-1 text-xs font-semibold transition ${
                 filterStatus === st
-                  ? "bg-[#D4AF37] text-[#0B0B0D]"
-                  : "text-[#A1A1AA] hover:text-[#FAFAF9]"
+                  ? "bg-up-500 text-white shadow-xs"
+                  : "text-[#6B5D73] hover:text-[#1D0F24]"
               }`}
             >
               {st === "pending"
@@ -284,12 +285,12 @@ export default function AdminKycModerationPage() {
                   onClick={() => setSelectedApplicant(applicant)}
                   className={`cursor-pointer rounded-2xl border p-4 transition-all ${
                     isSelected
-                      ? "border-[#D4AF37] bg-[#D4AF37]/10 shadow-[0_0_15px_rgba(212,175,55,0.15)]"
-                      : "border-white/10 bg-[#151518] hover:border-white/20"
+                      ? "border-up-500 bg-up-50 shadow-xs"
+                      : "border-[#F0E6F3] bg-white hover:border-up-200"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-white/10 bg-[#0B0B0D]">
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-[#F0E6F3] bg-[#FAF9FB]">
                       <Image
                         src={applicant.avatarUrl}
                         alt={applicant.fullName}
@@ -299,16 +300,16 @@ export default function AdminKycModerationPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between">
-                        <p className="truncate text-xs font-bold text-[#FAFAF9]">
+                        <p className="truncate text-xs font-bold text-[#1D0F24]">
                           {applicant.fullName}
                         </p>
                         <span
                           className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase ${
                             applicant.status === "verified"
-                              ? "bg-[#22C55E]/15 text-[#22C55E]"
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                               : applicant.status === "rejected"
-                              ? "bg-[#EF4444]/15 text-[#EF4444]"
-                              : "bg-amber-500/15 text-amber-400"
+                              ? "bg-red-50 text-red-600 border border-red-200"
+                              : "bg-amber-50 text-amber-700 border border-amber-200"
                           }`}
                         >
                           {applicant.status === "verified"
@@ -318,8 +319,8 @@ export default function AdminKycModerationPage() {
                             : "En attente"}
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#A1A1AA] flex items-center gap-1 mt-0.5">
-                        <MapPin size={11} className="text-[#D4AF37]" />
+                      <p className="text-[11px] text-[#6B5D73] flex items-center gap-1 mt-0.5">
+                        <MapPin size={11} className="text-up-500" />
                         <span>{applicant.zone}</span>
                         <span>·</span>
                         <span>{applicant.phoneNumber}</span>
@@ -330,7 +331,7 @@ export default function AdminKycModerationPage() {
               );
             })
           ) : (
-            <div className="rounded-2xl border border-white/10 bg-[#151518] p-8 text-center text-xs text-[#A1A1AA]">
+            <div className="rounded-2xl border border-[#F0E6F3] bg-white p-8 text-center text-xs text-[#6B5D73]">
               Aucun dossier KYC trouvé.
             </div>
           )}
@@ -339,10 +340,10 @@ export default function AdminKycModerationPage() {
         {/* Colonne de droite : Panneau de détail & Actions */}
         <div className="lg:col-span-7">
           {selectedApplicant ? (
-            <div className="rounded-[28px] border border-[rgba(212,175,55,0.22)] bg-[#151518] p-6 shadow-2xl space-y-5">
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="rounded-3xl border border-[#F0E6F3] bg-white p-6 shadow-xs space-y-5">
+              <div className="flex items-center justify-between border-b border-[#F0E6F3] pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="relative h-14 w-14 overflow-hidden rounded-full border-2 border-[#D4AF37]">
+                  <div className="relative h-14 w-14 overflow-hidden rounded-full border-2 border-up-500 shadow-xs">
                     <Image
                       src={selectedApplicant.avatarUrl}
                       alt={selectedApplicant.fullName}
@@ -351,10 +352,10 @@ export default function AdminKycModerationPage() {
                     />
                   </div>
                   <div>
-                    <h2 className="font-display text-lg font-bold text-[#FAFAF9]">
+                    <h2 className="font-display text-lg font-bold text-[#1D0F24]">
                       {selectedApplicant.fullName}
                     </h2>
-                    <p className="text-xs text-[#D4AF37]">
+                    <p className="text-xs text-up-700">
                       {selectedApplicant.phoneNumber} · {selectedApplicant.zone}
                     </p>
                   </div>
@@ -365,7 +366,7 @@ export default function AdminKycModerationPage() {
                     <button
                       type="button"
                       onClick={() => handleApprove(selectedApplicant)}
-                      className="flex items-center gap-1.5 rounded-full bg-[#22C55E] px-4 py-2 text-xs font-bold text-[#0B0B0D] hover:bg-[#22C55E]/90"
+                      className="flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 shadow-xs"
                     >
                       <Check size={14} />
                       <span>Approuver</span>
@@ -373,7 +374,7 @@ export default function AdminKycModerationPage() {
                     <button
                       type="button"
                       onClick={() => setIsRejectModalOpen(true)}
-                      className="flex items-center gap-1.5 rounded-full border border-[#EF4444]/40 bg-[#EF4444]/10 px-3.5 py-2 text-xs font-semibold text-[#EF4444] hover:bg-[#EF4444]/20"
+                      className="flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-100"
                     >
                       <X size={14} />
                       <span>Rejeter</span>
@@ -384,25 +385,25 @@ export default function AdminKycModerationPage() {
 
               {/* Détails du profil */}
               <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="rounded-2xl border border-white/5 bg-[#0B0B0D] p-3">
-                  <span className="text-[10px] text-[#A1A1AA] uppercase">Tarif horaire</span>
-                  <p className="font-bold text-[#FAFAF9] text-sm mt-0.5">
+                <div className="rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] p-3">
+                  <span className="text-[10px] text-[#6B5D73] uppercase font-semibold">Tarif horaire</span>
+                  <p className="font-bold text-[#1D0F24] text-sm mt-0.5">
                     {selectedApplicant.hourlyRateXaf.toLocaleString("fr-FR")} FCFA/h
                   </p>
                 </div>
-                <div className="rounded-2xl border border-white/5 bg-[#0B0B0D] p-3">
-                  <span className="text-[10px] text-[#A1A1AA] uppercase">Forfait soirée</span>
-                  <p className="font-bold text-[#FAFAF9] text-sm mt-0.5">
+                <div className="rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] p-3">
+                  <span className="text-[10px] text-[#6B5D73] uppercase font-semibold">Forfait soirée</span>
+                  <p className="font-bold text-[#1D0F24] text-sm mt-0.5">
                     {selectedApplicant.eveningRateXaf.toLocaleString("fr-FR")} FCFA
                   </p>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-white/5 bg-[#0B0B0D] p-4 text-xs space-y-2">
-                <p className="font-bold text-[#FAFAF9]">Biographie &amp; Parcours :</p>
-                <p className="text-[#A1A1AA] leading-relaxed">{selectedApplicant.bio}</p>
+              <div className="rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] p-4 text-xs space-y-2">
+                <p className="font-bold text-[#1D0F24]">Biographie &amp; Parcours :</p>
+                <p className="text-[#6B5D73] leading-relaxed">{selectedApplicant.bio}</p>
                 {selectedApplicant.education && (
-                  <p className="text-[#D4AF37] pt-2 border-t border-white/5">
+                  <p className="text-up-700 pt-2 border-t border-[#F0E6F3] font-semibold">
                     🎓 Formation : {selectedApplicant.education}
                   </p>
                 )}
@@ -412,7 +413,7 @@ export default function AdminKycModerationPage() {
                 {selectedApplicant.services.map((s) => (
                   <span
                     key={s}
-                    className="rounded-full border border-white/10 bg-[#202024] px-3 py-1 text-[11px] text-[#FAFAF9]"
+                    className="rounded-full border border-up-200 bg-up-50 px-3 py-1 text-[11px] text-up-700 font-semibold"
                   >
                     {s.replace("_", " ")}
                   </span>
@@ -420,7 +421,7 @@ export default function AdminKycModerationPage() {
               </div>
             </div>
           ) : (
-            <div className="grid place-items-center rounded-[28px] border border-white/10 bg-[#151518] p-12 text-center text-xs text-[#A1A1AA]">
+            <div className="grid place-items-center rounded-3xl border border-[#F0E6F3] bg-white p-12 text-center text-xs text-[#6B5D73]">
               Sélectionnez un dossier à modérer.
             </div>
           )}
@@ -429,19 +430,19 @@ export default function AdminKycModerationPage() {
 
       {/* Modal Rejet */}
       {isRejectModalOpen && selectedApplicant && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
-          <div className="w-full max-w-md rounded-3xl border border-[#EF4444]/40 bg-[#151518] p-6 shadow-2xl">
-            <h3 className="font-display text-lg font-bold text-[#FAFAF9]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1D0F24]/60 p-4 backdrop-blur-md">
+          <div className="w-full max-w-md rounded-3xl border border-red-200 bg-white p-6 shadow-2xl">
+            <h3 className="font-display text-lg font-bold text-[#1D0F24]">
               Rejeter la candidature de {selectedApplicant.fullName}
             </h3>
-            <p className="mt-1 text-xs text-[#A1A1AA]">
+            <p className="mt-1 text-xs text-[#6B5D73]">
               Précisez le motif du rejet pour informer le prestataire.
             </p>
             <form onSubmit={handleConfirmReject} className="mt-4 space-y-3">
               <select
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-[#0B0B0D] p-3 text-xs text-[#FAFAF9]"
+                className="w-full rounded-xl border border-[#F0E6F3] bg-[#FAF9FB] p-3 text-xs text-[#1D0F24]"
               >
                 <option value="Document CNI/Passeport illisible ou reflets masquant les informations">
                   Document CNI/Passeport illisible
@@ -458,13 +459,13 @@ export default function AdminKycModerationPage() {
                 <button
                   type="button"
                   onClick={() => setIsRejectModalOpen(false)}
-                  className="rounded-xl border border-white/10 px-4 py-2 text-xs text-[#A1A1AA] hover:text-[#FAFAF9]"
+                  className="rounded-full border border-[#F0E6F3] px-4 py-2 text-xs text-[#6B5D73] hover:text-[#1D0F24]"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-[#EF4444] px-4 py-2 text-xs font-bold text-[#FAFAF9]"
+                  className="rounded-full bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700 shadow-xs"
                 >
                   Confirmer le rejet
                 </button>

@@ -18,13 +18,13 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "UP Gabon — Conciergerie Privée & Accompagnement d'Élite",
+  title: "UP Gabon — Conciergerie Privée & Accompagnement Professionnel",
   description:
-    "Plateforme officielle d'accompagnement social encadré, protocolaire et d'assistance de conciergerie privée au Gabon.",
+    "Plateforme de mise en relation sécurisée avec des prestataires et accompagnateurs vérifiés au Gabon pour vos événements, rendez-vous d'affaires et moments de partage.",
   applicationName: "UP Gabon",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "UP Gabon",
   },
   formatDetection: {
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0B0B0D",
+  themeColor: "#8807A8",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -47,15 +47,15 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="fr" className={`${inter.variable} ${playfair.variable} dark`}>
+    <html lang="fr" className={`${inter.variable} ${playfair.variable}`}>
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
-      <body className="min-h-dvh bg-[#0B0B0D] font-sans text-[#FAFAF9] antialiased select-none selection:bg-[#D4AF37]/30 selection:text-[#FAFAF9]">
+      <body className="min-h-dvh bg-[#FAF9FB] font-sans text-[#1D0F24] antialiased select-none selection:bg-up-100 selection:text-up-900">
         <NetworkStatusBanner />
-        <div className="min-h-dvh flex flex-col w-full bg-[#0B0B0D]">
+        <div className="min-h-dvh flex flex-col w-full bg-[#FAF9FB]">
           {children}
         </div>
       </body>

@@ -112,22 +112,22 @@ function SignupForm() {
   };
 
   return (
-    <div className="w-full max-w-md rounded-3xl border border-[rgba(212,175,55,0.22)] bg-[#151518] p-8 shadow-[0_15px_50px_rgba(0,0,0,0.8)]">
+    <div className="w-full max-w-md rounded-3xl border border-[#F0E6F3] bg-white p-8 shadow-sm">
       <div className="text-center">
         <div className="inline-block">
           <UpLogo size={44} showText={false} />
         </div>
-        <h1 className="mt-4 font-display text-2xl font-bold tracking-tight text-[#FAFAF9]">
+        <h1 className="mt-4 font-display text-2xl font-bold tracking-tight text-[#1D0F24]">
           Création de Compte UP
         </h1>
-        <p className="mt-1.5 text-xs text-[#A1A1AA]">
+        <p className="mt-1.5 text-xs text-[#6B5D73]">
           Rejoignez la conciergerie privée et d&apos;accompagnement d&apos;élite
         </p>
       </div>
 
       {/* Role Selection */}
       <div className="mt-6">
-        <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#D4AF37]">
+        <label className="block text-[11px] font-semibold uppercase tracking-wider text-up-700">
           Type de compte
         </label>
         <div className="mt-2 grid grid-cols-2 gap-2">
@@ -136,16 +136,18 @@ function SignupForm() {
             onClick={() => setSelectedRole("client")}
             className={`flex items-center gap-2 rounded-2xl border p-3 text-left transition ${
               selectedRole === "client"
-                ? "border-[#D4AF37] bg-[#D4AF37]/15 text-[#FAFAF9] shadow-[0_0_12px_rgba(212,175,55,0.2)]"
-                : "border-white/10 bg-[#0B0B0D] text-[#A1A1AA] hover:border-white/20 hover:text-[#FAFAF9]"
+                ? "border-up-500 bg-up-50 text-[#1D0F24] shadow-xs"
+                : "border-[#F0E6F3] bg-[#FAF9FB] text-[#6B5D73] hover:border-up-200 hover:text-[#1D0F24]"
             }`}
           >
-            <span className="grid h-7 w-7 place-items-center rounded-xl bg-[#D4AF37]/20 text-[#D4AF37]">
+            <span className={`grid h-7 w-7 place-items-center rounded-xl ${
+              selectedRole === "client" ? "bg-up-500 text-white" : "bg-up-100 text-up-700"
+            }`}>
               <Compass size={16} />
             </span>
             <div>
               <p className="text-xs font-bold">Client</p>
-              <p className="text-[10px] text-[#A1A1AA]">Réserver</p>
+              <p className="text-[10px] text-[#6B5D73]">Réserver</p>
             </div>
           </button>
 
@@ -154,30 +156,32 @@ function SignupForm() {
             onClick={() => setSelectedRole("companion")}
             className={`flex items-center gap-2 rounded-2xl border p-3 text-left transition ${
               selectedRole === "companion"
-                ? "border-[#D4AF37] bg-[#D4AF37]/15 text-[#FAFAF9] shadow-[0_0_12px_rgba(212,175,55,0.2)]"
-                : "border-white/10 bg-[#0B0B0D] text-[#A1A1AA] hover:border-white/20 hover:text-[#FAFAF9]"
+                ? "border-up-500 bg-up-50 text-[#1D0F24] shadow-xs"
+                : "border-[#F0E6F3] bg-[#FAF9FB] text-[#6B5D73] hover:border-up-200 hover:text-[#1D0F24]"
             }`}
           >
-            <span className="grid h-7 w-7 place-items-center rounded-xl bg-[#F1D875]/20 text-[#F1D875]">
+            <span className={`grid h-7 w-7 place-items-center rounded-xl ${
+              selectedRole === "companion" ? "bg-up-500 text-white" : "bg-up-100 text-up-700"
+            }`}>
               <Sparkles size={16} />
             </span>
             <div>
               <p className="text-xs font-bold">Prestataire</p>
-              <p className="text-[10px] text-[#A1A1AA]">Offrir services</p>
+              <p className="text-[10px] text-[#6B5D73]">Offrir services</p>
             </div>
           </button>
         </div>
       </div>
 
       {errorMessage && (
-        <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-[#EF4444]/30 bg-[#EF4444]/10 p-3.5 text-xs text-[#EF4444] animate-in fade-in">
+        <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-red-200 bg-red-50 p-3.5 text-xs text-red-600 animate-in fade-in">
           <AlertCircle size={16} className="mt-0.5 shrink-0" />
           <span>{errorMessage}</span>
         </div>
       )}
 
       {successMessage && (
-        <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-[#22C55E]/30 bg-[#22C55E]/10 p-3.5 text-xs text-[#22C55E] animate-in fade-in">
+        <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50 p-3.5 text-xs text-emerald-700 animate-in fade-in">
           <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
           <span>{successMessage}</span>
         </div>
@@ -187,12 +191,12 @@ function SignupForm() {
         <div>
           <label
             htmlFor="signup-name"
-            className="block text-[11px] font-semibold uppercase tracking-wider text-[#A1A1AA]"
+            className="block text-[11px] font-semibold uppercase tracking-wider text-[#6B5D73]"
           >
             Nom et Prénom
           </label>
           <div className="relative mt-1 flex items-center">
-            <User size={15} className="absolute left-3.5 text-[#A1A1AA]" />
+            <User size={15} className="absolute left-3.5 text-[#6B5D73]" />
             <input
               id="signup-name"
               type="text"
@@ -200,7 +204,7 @@ function SignupForm() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Jean Ndong"
-              className="w-full rounded-xl border border-white/10 bg-[#0B0B0D] py-2.5 pl-10 pr-3 text-xs text-[#FAFAF9] placeholder-[#A1A1AA]/50 transition focus:border-[#D4AF37] focus:outline-none"
+              className="w-full rounded-xl border border-[#F0E6F3] bg-[#FAF9FB] py-2.5 pl-10 pr-3 text-xs text-[#1D0F24] placeholder-[#6B5D73]/50 transition focus:border-up-500 focus:outline-none"
             />
           </div>
         </div>
@@ -208,12 +212,12 @@ function SignupForm() {
         <div>
           <label
             htmlFor="signup-email"
-            className="block text-[11px] font-semibold uppercase tracking-wider text-[#A1A1AA]"
+            className="block text-[11px] font-semibold uppercase tracking-wider text-[#6B5D73]"
           >
             Adresse E-mail
           </label>
           <div className="relative mt-1 flex items-center">
-            <Mail size={15} className="absolute left-3.5 text-[#A1A1AA]" />
+            <Mail size={15} className="absolute left-3.5 text-[#6B5D73]" />
             <input
               id="signup-email"
               type="email"
@@ -221,7 +225,7 @@ function SignupForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="votre.email@domaine.ga"
-              className="w-full rounded-xl border border-white/10 bg-[#0B0B0D] py-2.5 pl-10 pr-3 text-xs text-[#FAFAF9] placeholder-[#A1A1AA]/50 transition focus:border-[#D4AF37] focus:outline-none"
+              className="w-full rounded-xl border border-[#F0E6F3] bg-[#FAF9FB] py-2.5 pl-10 pr-3 text-xs text-[#1D0F24] placeholder-[#6B5D73]/50 transition focus:border-up-500 focus:outline-none"
             />
           </div>
         </div>
@@ -229,13 +233,13 @@ function SignupForm() {
         <div>
           <label
             htmlFor="signup-phone"
-            className="block text-[11px] font-semibold uppercase tracking-wider text-[#A1A1AA]"
+            className="block text-[11px] font-semibold uppercase tracking-wider text-[#6B5D73]"
           >
             Numéro Téléphone / Mobile Money
           </label>
           <div className="relative mt-1 flex items-center">
-            <Phone size={15} className="absolute left-3.5 text-[#A1A1AA]" />
-            <span className="absolute left-9 text-xs font-bold text-[#A1A1AA]">
+            <Phone size={15} className="absolute left-3.5 text-[#6B5D73]" />
+            <span className="absolute left-9 text-xs font-bold text-[#6B5D73]">
               +241
             </span>
             <input
@@ -245,7 +249,7 @@ function SignupForm() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="074123456"
-              className="w-full rounded-xl border border-white/10 bg-[#0B0B0D] py-2.5 pl-18 pr-3 text-xs text-[#FAFAF9] placeholder-[#A1A1AA]/50 transition focus:border-[#D4AF37] focus:outline-none"
+              className="w-full rounded-xl border border-[#F0E6F3] bg-[#FAF9FB] py-2.5 pl-18 pr-3 text-xs text-[#1D0F24] placeholder-[#6B5D73]/50 transition focus:border-up-500 focus:outline-none"
             />
           </div>
         </div>
@@ -253,12 +257,12 @@ function SignupForm() {
         <div>
           <label
             htmlFor="signup-password"
-            className="block text-[11px] font-semibold uppercase tracking-wider text-[#A1A1AA]"
+            className="block text-[11px] font-semibold uppercase tracking-wider text-[#6B5D73]"
           >
             Mot de passe (6 caractères min.)
           </label>
           <div className="relative mt-1 flex items-center">
-            <Lock size={15} className="absolute left-3.5 text-[#A1A1AA]" />
+            <Lock size={15} className="absolute left-3.5 text-[#6B5D73]" />
             <input
               id="signup-password"
               type="password"
@@ -267,7 +271,7 @@ function SignupForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••••"
-              className="w-full rounded-xl border border-white/10 bg-[#0B0B0D] py-2.5 pl-10 pr-3 text-xs text-[#FAFAF9] placeholder-[#A1A1AA]/50 transition focus:border-[#D4AF37] focus:outline-none"
+              className="w-full rounded-xl border border-[#F0E6F3] bg-[#FAF9FB] py-2.5 pl-10 pr-3 text-xs text-[#1D0F24] placeholder-[#6B5D73]/50 transition focus:border-up-500 focus:outline-none"
             />
           </div>
         </div>
@@ -275,11 +279,11 @@ function SignupForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#D4AF37] py-3.5 text-xs font-bold text-[#0B0B0D] transition-all hover:bg-[#F1D875] hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] disabled:opacity-50"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-up-500 text-white hover:bg-up-600 shadow-md shadow-up-500/20 active:scale-[0.98] py-3.5 text-xs font-bold transition-all disabled:opacity-50"
         >
           {isLoading ? (
             <span className="flex items-center gap-2">
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#0B0B0D] border-t-transparent" />
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
               Création du compte...
             </span>
           ) : (
@@ -291,20 +295,20 @@ function SignupForm() {
         </button>
       </form>
 
-      <div className="mt-5 border-t border-white/10 pt-4 text-center">
-        <p className="text-xs text-[#A1A1AA]">
+      <div className="mt-5 border-t border-[#F0E6F3] pt-4 text-center">
+        <p className="text-xs text-[#6B5D73]">
           Vous possédez déjà un compte ?{" "}
           <Link
             href="/auth/login"
-            className="font-semibold text-[#D4AF37] hover:underline"
+            className="font-semibold text-up-600 hover:underline"
           >
             Se connecter
           </Link>
         </p>
       </div>
 
-      <div className="mt-5 flex items-center justify-center gap-1.5 text-[11px] text-[#A1A1AA]/70">
-        <ShieldCheck size={13} className="text-[#22C55E]" />
+      <div className="mt-5 flex items-center justify-center gap-1.5 text-[11px] text-[#6B5D73]">
+        <ShieldCheck size={13} className="text-emerald-600" />
         <span>Charte éthique et protection des données respectées</span>
       </div>
     </div>
@@ -313,10 +317,10 @@ function SignupForm() {
 
 export default function SignupPage() {
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center bg-[#0B0B0D] px-4 py-12">
+    <div className="min-h-dvh flex flex-col items-center justify-center bg-[#FAF9FB] px-4 py-12">
       <Suspense
         fallback={
-          <div className="h-96 w-full max-w-md rounded-3xl border border-white/10 bg-[#151518] animate-pulse" />
+          <div className="h-96 w-full max-w-md rounded-3xl border border-[#F0E6F3] bg-white animate-pulse" />
         }
       >
         <SignupForm />

@@ -8,8 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
       "Plateforme d'accompagnement social encadré et de conciergerie privée d'élite à Libreville, Akanda et Port-Gentil.",
     start_url: "/",
     display: "standalone",
-    background_color: "#0B0B0D",
-    theme_color: "#0B0B0D",
+    background_color: "#FAF9FB",
+    theme_color: "#8807A8",
     orientation: "portrait-primary",
     icons: [
       {

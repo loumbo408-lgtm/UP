@@ -1,38 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  ArrowUpRight,
+  ArrowRight,
   BadgeCheck,
+  Building2,
   Calendar,
-  Check,
   CheckCircle2,
   Clock,
-  Compass,
-  LogOut,
+  KeyRound,
   MapPin,
-  MessageSquare,
-  Power,
-  Radar,
   Radio,
-  RefreshCw,
-  Repeat,
-  Shield,
   ShieldCheck,
-  Sparkles,
-  Star,
-  User,
   Wallet,
   X,
-  XCircle,
 } from "lucide-react";
-import { PersonaShell } from "@/components/persona-shell";
-import { prestataireNav } from "@/lib/nav";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { useUpStore, type RadarDemand } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
-import { SECURE_PUBLIC_VENUES } from "@/lib/data";
 
 export default function CompanionDashboardPage() {
   const hydrated = useHydrated();
@@ -45,16 +31,13 @@ export default function CompanionDashboardPage() {
   const acceptRadarDemand = useUpStore((s) => s.acceptRadarDemand);
   const declineRadarDemand = useUpStore((s) => s.declineRadarDemand);
   const withdrawEarnings = useUpStore((s) => s.withdrawEarnings);
-  const clearRole = useUpStore((s) => s.clearRole);
 
   const isOnline = hydrated && available;
 
   // Real Supabase profile state
   const [profileName, setProfileName] = useState<string>("Prestataire UP");
-  const [profileAvatar, setProfileAvatar] = useState<string>(
-    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop",
-  );
   const [profileZone, setProfileZone] = useState<string>("Libreville");
+  const [profileHourlyRate, setProfileHourlyRate] = useState<number>(25000);
 
   useEffect(() => {
     async function loadCompanionData() {
@@ -73,15 +56,17 @@ export default function CompanionDashboardPage() {
             .maybeSingle();
 
           if (profile) {
-            setProfileName(profile.full_name || user.user_metadata?.full_name || "Prestataire UP");
-            if (profile.avatar_url) {
-              setProfileAvatar(profile.avatar_url);
-            }
+            setProfileName(
+              profile.full_name || user.user_metadata?.full_name || "Prestataire UP",
+            );
             const details = Array.isArray(profile.companion_details)
               ? profile.companion_details[0]
               : profile.companion_details;
             if (details?.zone_preference) {
               setProfileZone(details.zone_preference);
+            }
+            if (details?.hourly_rate_xaf) {
+              setProfileHourlyRate(details.hourly_rate_xaf);
             }
           }
         }
@@ -94,21 +79,16 @@ export default function CompanionDashboardPage() {
 
   // Withdrawal modal state
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
-  const [operator, setOperator] = useState<"airtel_money" | "moov_money">(
-    "airtel_money",
-  );
+  const [operator, setOperator] = useState<"airtel_money" | "moov_money">("airtel_money");
   const [withdrawPhone, setWithdrawPhone] = useState("074123456");
   const [withdrawAmount, setWithdrawAmount] = useState("50000");
   const [isWithdrawProcessing, setIsWithdrawProcessing] = useState(false);
-  const [withdrawSuccessMsg, setWithdrawSuccessMsg] = useState<string | null>(
-    null,
-  );
+  const [withdrawSuccessMsg, setWithdrawSuccessMsg] = useState<string | null>(null);
 
   // Accept notification modal
   const [acceptedDemand, setAcceptedDemand] = useState<RadarDemand | null>(null);
 
   // OTP release modal for companion
-  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
   const [enteredOtp, setEnteredOtp] = useState("");
   const [otpProcessing, setOtpProcessing] = useState(false);
   const [otpSuccessMsg, setOtpSuccessMsg] = useState<string | null>(null);
@@ -127,7 +107,9 @@ export default function CompanionDashboardPage() {
       withdrawEarnings(parsedAmount, operator, withdrawPhone);
       setIsWithdrawProcessing(false);
       setWithdrawSuccessMsg(
-        `Virement de ${parsedAmount.toLocaleString("fr-FR")} FCFA validé vers votre compte ${operator === "airtel_money" ? "Airtel Money" : "Moov Money"} (+241 ${withdrawPhone}).`,
+        `Virement de ${parsedAmount.toLocaleString("fr-FR")} FCFA validé vers votre compte ${
+          operator === "airtel_money" ? "Airtel Money" : "Moov Money"
+        } (+241 ${withdrawPhone}).`,
       );
     }, 700);
   };
@@ -162,7 +144,9 @@ export default function CompanionDashboardPage() {
 
       setOtpProcessing(false);
       setOtpSuccessMsg(
-        `Félicitations ! Les ${data.payout.amountReleasedXaf.toLocaleString("fr-FR")} FCFA ont été crédités sur votre solde disponible.`,
+        `Félicitations ! Les ${data.payout.amountReleasedXaf.toLocaleString(
+          "fr-FR",
+        )} FCFA ont été crédités sur votre solde disponible.`,
       );
     } catch (err: unknown) {
       setOtpProcessing(false);
@@ -172,596 +156,486 @@ export default function CompanionDashboardPage() {
     }
   };
 
-  return (
-    <PersonaShell items={prestataireNav}>
-      <div className="min-h-dvh bg-up-black text-up-white pb-10">
-        {/* 1. En-tête avec profil et interrupteur lumineux */}
-        <header className="border-b border-white/5 bg-up-surface/90 px-5 pt-6 pb-5 backdrop-blur-md">
-          <div className="flex items-center justify-between">
-            <Link
-              href="/prestataire/profil"
-              className="flex items-center gap-3 group"
-            >
-              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-up-gold/40 transition group-hover:border-up-gold">
-                <Image
-                  src={profileAvatar}
-                  alt={profileName}
-                  fill
-                  className="object-cover object-top"
-                />
-                {isOnline && (
-                  <span className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-up-surface bg-emerald-400 shadow-[0_0_8px_#34d399]" />
-                )}
-              </div>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <h1 className="font-display text-base font-bold text-up-white group-hover:text-up-gold transition">
-                    {profileName}
-                  </h1>
-                  <BadgeCheck size={16} className="text-up-gold" />
-                </div>
-                <div className="flex items-center gap-2 text-xs text-up-gray">
-                  <span className="flex items-center gap-0.5 text-up-gold">
-                    <Star size={12} className="fill-up-gold" />
-                    5.0
-                  </span>
-                  <span>·</span>
-                  <span>Libreville · {profileZone}</span>
-                </div>
-              </div>
-            </Link>
+  // Colonne latérale de widgets
+  const rightSidebarContent = (
+    <div className="space-y-6">
+      {/* 1. Interrupteur de Disponibilité Directe */}
+      <div className="rounded-3xl border border-[#F0E6F3] bg-white p-6 shadow-xs">
+        <h3 className="font-display text-sm font-bold text-[#1D0F24]">
+          Statut de Présence
+        </h3>
 
-            <div className="flex items-center gap-2">
-              <Link
-                href="/prestataire/profil"
-                className="flex items-center gap-1.5 rounded-xl border border-up-gold/30 bg-up-gold/10 px-3 py-1.5 text-xs font-semibold text-up-gold transition hover:bg-up-gold/20"
-              >
-                <span>Tarifs &amp; Profil</span>
-              </Link>
-              <Link
-                href="/"
-                onClick={() => clearRole()}
-                className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-[11px] text-up-gray hover:text-up-white"
-              >
-                <Repeat size={13} className="text-up-gold" />
-                <span>Rôle</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Interrupteur lumineux DISPONIBLE CE SOIR / HORS LIGNE */}
-          <div className="mt-4">
-            <button
-              type="button"
-              onClick={() => setAvailable(!available)}
-              className={`group flex w-full items-center justify-between rounded-2xl border p-4 transition-all duration-300 ${
-                isOnline
-                  ? "border-up-gold/60 bg-gradient-to-r from-up-gold/20 via-up-surface to-up-surface shadow-[0_0_25px_rgba(212,175,55,0.25)]"
-                  : "border-white/10 bg-up-surface/60 opacity-80 hover:opacity-100"
-              }`}
-            >
-              <div className="flex items-center gap-3.5 text-left">
-                <div
-                  className={`grid h-11 w-11 place-items-center rounded-xl transition ${
-                    isOnline
-                      ? "bg-up-gold text-up-black shadow-[0_0_15px_rgba(212,175,55,0.5)]"
-                      : "bg-white/5 text-up-gray"
-                  }`}
-                >
-                  <Power size={20} className={isOnline ? "animate-pulse" : ""} />
-                </div>
-                <div>
-                  <span
-                    className={`block text-xs font-bold uppercase tracking-wider ${
-                      isOnline ? "text-up-gold" : "text-up-gray"
-                    }`}
-                  >
-                    {isOnline ? "● DISPONIBLE CE SOIR (EN LIGNE)" : "○ HORS LIGNE"}
-                  </span>
-                  <span className="block text-[11px] text-up-gray">
-                    {isOnline
-                      ? "Vous apparaissez en priorité sur le radar client"
-                      : "Activez pour recevoir des demandes ce soir"}
-                  </span>
-                </div>
-              </div>
-
-              {/* Bouton switch physique stylisé */}
-              <span
-                className={`relative h-7 w-12 shrink-0 rounded-full transition-colors duration-300 ${
-                  isOnline ? "bg-up-gold" : "bg-white/15"
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={() => setAvailable(!available)}
+            className={`flex w-full items-center justify-between rounded-2xl border p-4 transition-all duration-300 ${
+              isOnline
+                ? "border-emerald-500 bg-emerald-50/60 shadow-xs"
+                : "border-[#F0E6F3] bg-[#FAF9FB] opacity-85"
+            }`}
+          >
+            <div className="flex items-center gap-3 text-left">
+              <div
+                className={`grid h-10 w-10 place-items-center rounded-xl transition ${
+                  isOnline
+                    ? "bg-emerald-500 text-white shadow-xs"
+                    : "bg-up-50 text-[#6B5D73]"
                 }`}
               >
-                <span
-                  className={`absolute top-0.5 h-6 w-6 rounded-full bg-up-black transition-all duration-300 shadow-md ${
-                    isOnline ? "left-[1.375rem]" : "left-0.5"
-                  }`}
-                />
-              </span>
-            </button>
+                <Radio size={20} className={isOnline ? "animate-pulse" : ""} />
+              </div>
+              <div>
+                <p className="font-display text-xs font-bold text-[#1D0F24]">
+                  {isOnline ? "DISPONIBLE EN DIRECT" : "EN PAUSE (HORS LIGNE)"}
+                </p>
+                <p className="text-[10px] text-[#6B5D73]">
+                  {isOnline
+                    ? "Visible sur le radar client de Libreville"
+                    : "Aucune notification radar reçue"}
+                </p>
+              </div>
+            </div>
+
+            <div
+              className={`h-6 w-11 rounded-full transition-colors p-0.5 ${
+                isOnline ? "bg-emerald-500" : "bg-up-200"
+              }`}
+            >
+              <div
+                className={`h-5 w-5 rounded-full bg-white transition-transform ${
+                  isOnline ? "translate-x-5 shadow-xs" : "translate-x-0"
+                }`}
+              />
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* 2. Statut d'Agrément & KYC Officiel */}
+      <div className="rounded-3xl border border-[#F0E6F3] bg-white p-6 shadow-xs">
+        <div className="flex items-center justify-between">
+          <h3 className="font-display text-sm font-bold text-[#1D0F24]">
+            Agrément Professionnel
+          </h3>
+          <span className="flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-600 px-2.5 py-0.5 text-[10px] font-bold">
+            <BadgeCheck size={12} />
+            KYC Vérifié
+          </span>
+        </div>
+
+        <div className="mt-4 space-y-2 text-xs">
+          <div className="flex items-center justify-between rounded-xl bg-[#FAF9FB] p-2.5 border border-[#F0E6F3]">
+            <span className="text-[#6B5D73]">Zone d&apos;activité</span>
+            <span className="font-bold text-[#1D0F24]">{profileZone}</span>
           </div>
-        </header>
+          <div className="flex items-center justify-between rounded-xl bg-[#FAF9FB] p-2.5 border border-[#F0E6F3]">
+            <span className="text-[#6B5D73]">Tarif horaire de base</span>
+            <span className="font-bold text-up-700">
+              {profileHourlyRate.toLocaleString("fr-FR")} FCFA/h
+            </span>
+          </div>
+        </div>
 
-        <main className="px-5 py-5 space-y-6">
-          {/* 2. Section Financière */}
-          <section>
-            <div className="flex items-center justify-between mb-3">
-              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-up-gold">
-                <Wallet size={14} />
-                Espace Financier
+        <Link
+          href="/prestataire/profil"
+          className="mt-4 block w-full rounded-full border border-up-200 py-2.5 text-center text-xs font-bold text-[#1D0F24] transition hover:border-up-500 hover:text-up-700"
+        >
+          Modifier mes tarifs et services
+        </Link>
+      </div>
+
+      {/* 3. Guide Déontologique & Lieux Publics */}
+      <div className="rounded-3xl border border-up-200 bg-up-50/70 p-6 shadow-xs">
+        <div className="flex items-center gap-2 text-up-700">
+          <ShieldCheck size={20} />
+          <h3 className="font-display text-sm font-bold text-[#1D0F24]">
+            Charte du Prestataire UP
+          </h3>
+        </div>
+        <p className="mt-2 text-xs leading-relaxed text-[#6B5D73]">
+          Les prestations doivent s&apos;effectuer exclusivement dans les établissements publics certifiés de Libreville. Aucun lieu privé ou isolé n&apos;est toléré.
+        </p>
+        <Link
+          href="/#safety"
+          className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-up-700 hover:underline"
+        >
+          <span>Consulter les règles complètes</span>
+          <ArrowRight size={13} />
+        </Link>
+      </div>
+    </div>
+  );
+
+  return (
+    <DashboardShell
+      role="prestataire"
+      pageTitle={`Espace Prestataire · ${profileName.split(" ")[0]}`}
+      pageSubtitle="Gérez vos demandes de présence en direct, missions et revenus au Gabon."
+      actionButton={{
+        label: "Clôturer avec code OTP",
+        href: "#otp",
+        icon: KeyRound,
+      }}
+      rightSidebar={rightSidebarContent}
+    >
+      {/* ===================================================================
+          1. SECTION REVENUS & SOLDE MOBILE MONEY (VIOLET ROYAL & BLANC)
+          =================================================================== */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        {/* Carte Solde Disponible */}
+        <div className="rounded-3xl border border-[#F0E6F3] bg-white p-6 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#6B5D73]">
+              Solde Disponible
+            </span>
+            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-up-50 text-up-600">
+              <Wallet size={20} />
+            </span>
+          </div>
+
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="font-display text-3xl font-bold text-[#1D0F24]">
+              {balance.toLocaleString("fr-FR")}
+            </span>
+            <span className="font-semibold text-xs text-[#6B5D73]">FCFA</span>
+          </div>
+
+          <p className="mt-1 text-[11px] text-emerald-600 flex items-center gap-1 font-semibold">
+            <CheckCircle2 size={12} />
+            <span>Séquestres libérés prêts pour virement</span>
+          </p>
+
+          <button
+            type="button"
+            onClick={() => setIsWithdrawModalOpen(true)}
+            className="mt-5 w-full rounded-full bg-up-500 text-white hover:bg-up-600 shadow-md shadow-up-500/20 active:scale-[0.98] py-3 text-xs font-bold transition"
+          >
+            Retirer vers Airtel / Moov Money
+          </button>
+        </div>
+
+        {/* Carte Derniers Gains & Historique */}
+        <div className="rounded-3xl border border-[#F0E6F3] bg-white p-6 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#6B5D73]">
+                Dernières Missions Validées
               </span>
-              <button
-                type="button"
-                onClick={() => setIsOtpModalOpen(true)}
-                className="flex items-center gap-1 rounded-lg border border-up-gold/30 bg-up-gold/10 px-2.5 py-1 text-[11px] font-semibold text-up-gold hover:bg-up-gold/20"
-              >
-                <CheckCircle2 size={12} />
-                <span>Saisir code OTP client</span>
-              </button>
+              <span className="grid h-10 w-10 place-items-center rounded-2xl bg-up-50 text-up-700">
+                <Calendar size={18} />
+              </span>
             </div>
 
-            {/* Carte de Solde Disponible */}
-            <div className="overflow-hidden rounded-3xl border border-up-gold/40 bg-gradient-to-br from-up-gold/25 via-up-surface to-up-surface p-6 shadow-2xl">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wider text-up-gold-soft">
-                  Solde disponible
-                </span>
-                <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                  <ShieldCheck size={11} />
-                  Séquestre garanti UP
-                </span>
-              </div>
-
-              <p className="mt-2 font-display text-4xl font-bold tracking-tight text-up-white">
-                {hydrated ? balance.toLocaleString("fr-FR") : "125 000"}{" "}
-                <span className="text-base font-normal text-up-gray">FCFA</span>
-              </p>
-
-              <div className="mt-5 flex flex-wrap gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsWithdrawModalOpen(true);
-                    setWithdrawSuccessMsg(null);
-                  }}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-up-gold px-4 py-3 text-xs font-bold text-up-black transition hover:bg-up-gold-soft shadow-[0_0_20px_rgba(212,175,55,0.4)]"
-                >
-                  <ArrowUpRight size={16} />
-                  <span>Demander un virement Mobile Money</span>
-                </button>
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-2 border-t border-white/10 pt-3 text-[11px] text-up-gray">
-                <div>
-                  <span>Missions ce mois :</span>{" "}
-                  <span className="font-semibold text-up-white">6 honorées</span>
-                </div>
-                <div className="text-right">
-                  <span>Délai virement :</span>{" "}
-                  <span className="font-semibold text-emerald-400">Instantané</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Historique des missions rémunérées */}
-            <div className="mt-4 space-y-2">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-up-gray">
-                Historique des versements
-              </p>
-              {gains.slice(0, 3).map((g) => (
+            <div className="mt-3 space-y-2">
+              {gains.slice(0, 2).map((gain) => (
                 <div
-                  key={g.id}
-                  className="flex items-center justify-between rounded-2xl border border-white/10 bg-up-surface p-3.5 text-xs"
+                  key={gain.id}
+                  className="flex items-center justify-between rounded-xl bg-[#FAF9FB] p-2.5 text-xs border border-[#F0E6F3]"
                 >
                   <div>
-                    <p className="font-medium text-up-white">{g.label}</p>
-                    <p className="text-[10px] text-up-gray">{g.date}</p>
+                    <p className="font-bold text-[#1D0F24]">{gain.label}</p>
+                    <p className="text-[10px] text-[#6B5D73]">{gain.date}</p>
                   </div>
-                  <span
-                    className={`font-mono font-bold ${
-                      g.montant.startsWith("+") ? "text-up-gold" : "text-up-gray"
-                    }`}
-                  >
-                    {g.montant} FCFA
-                  </span>
+                  <span className="font-bold text-emerald-600">{gain.montant}</span>
                 </div>
               ))}
             </div>
-          </section>
+          </div>
 
-          {/* 3. Radar des Demandes Entrantes */}
-          <section>
-            <div className="flex items-center justify-between mb-3">
-              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-up-gold">
-                <Radar size={14} className={isOnline ? "animate-spin" : ""} />
-                Radar des Demandes Entrantes
-              </span>
-              <span className="rounded-full bg-up-gold/15 px-2.5 py-0.5 text-[10px] font-bold text-up-gold">
-                {radarDemands.filter((d) => d.status === "pending").length}{" "}
-                nouvelles
-              </span>
-            </div>
+          <Link
+            href="/prestataire/gains"
+            className="mt-4 flex items-center justify-between text-xs font-bold text-up-700 hover:underline pt-2 border-t border-[#F0E6F3]"
+          >
+            <span>Consulter l&apos;historique complet des gains</span>
+            <ArrowRight size={14} />
+          </Link>
+        </div>
+      </section>
 
-            {/* Liste des cartes de demandes */}
-            <div className="space-y-3.5">
-              {!hydrated ? (
-                <div className="space-y-3">
-                  <div className="overflow-hidden rounded-3xl border border-white/10 bg-up-surface p-4 animate-pulse space-y-3">
-                    <div className="flex justify-between items-center">
-                      <div className="h-4 w-32 bg-white/10 rounded-lg" />
-                      <div className="h-4 w-20 bg-up-gold/20 rounded-lg" />
-                    </div>
-                    <div className="h-3 w-48 bg-white/5 rounded-lg" />
-                    <div className="h-8 w-full bg-white/5 rounded-xl" />
-                  </div>
-                </div>
-              ) : (
-                radarDemands.map((demand) => {
-                const isAccepted = demand.status === "accepted";
-                const isDeclined = demand.status === "declined";
+      {/* ===================================================================
+          2. SECTION RADAR DES DEMANDES EN DIRECT
+          =================================================================== */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-display text-xl font-bold tracking-tight text-[#1D0F24] flex items-center gap-2">
+              <Radio size={20} className="text-up-500" />
+              <span>Demandes d&apos;Accompagnement en Direct</span>
+            </h2>
+            <p className="text-xs text-[#6B5D73]">
+              Notifications de réservations transmises par les clients vérifiés à Libreville
+            </p>
+          </div>
 
-                if (isDeclined) return null;
+          <span className="rounded-full bg-up-50 text-up-700 border border-up-200 px-3 py-1 text-xs font-bold">
+            {radarDemands.length} en attente
+          </span>
+        </div>
 
-                return (
-                  <article
-                    key={demand.id}
-                    className={`overflow-hidden rounded-3xl border p-4 transition-all duration-300 ${
-                      isAccepted
-                        ? "border-emerald-500/50 bg-gradient-to-b from-emerald-950/25 to-up-surface"
-                        : "border-up-gold/35 bg-up-surface shadow-xl hover:border-up-gold/60"
-                    }`}
-                  >
-                    {/* Header de la demande */}
-                    <div className="flex items-start justify-between gap-2 border-b border-white/10 pb-3">
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-semibold text-up-white text-sm">
-                            {demand.clientName}
-                          </span>
-                          {demand.clientVerified && (
-                            <BadgeCheck size={15} className="text-up-gold" />
-                          )}
-                        </div>
-                        <p className="mt-0.5 text-xs font-medium text-up-gold-soft">
-                          {demand.service}
-                        </p>
-                      </div>
-
-                      {/* Montant Net à gagner */}
-                      <div className="text-right">
-                        <span className="text-[10px] uppercase text-up-gray block">
-                          Net à gagner
-                        </span>
-                        <span className="font-display text-base font-bold text-up-gold">
-                          {demand.netEarnings.toLocaleString("fr-FR")} FCFA
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Détails de la mission */}
-                    <div className="mt-3 space-y-1.5 text-xs text-up-gray">
-                      <p className="flex items-center gap-2 text-up-white">
-                        <Clock size={13} className="text-up-gold" />
-                        <span>
-                          {demand.date} à {demand.time} ({demand.durationHours}h)
-                        </span>
-                      </p>
-                      <p className="flex items-center gap-2">
-                        <MapPin size={13} className="text-up-gold" />
-                        <span>
-                          {demand.venueName} ·{" "}
-                          <span className="text-up-gray">{demand.venueZone}</span>
-                        </span>
-                      </p>
-                      {demand.notes && (
-                        <p className="rounded-xl bg-white/5 p-2.5 text-[11px] italic text-up-gray border border-white/5">
-                          &laquo; {demand.notes} &raquo;
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Boutons d'Action */}
-                    <div className="mt-4 pt-3 border-t border-white/5">
-                      {isAccepted ? (
-                        <div className="flex flex-col gap-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 p-3 text-xs text-emerald-400">
-                          <span className="flex items-center gap-1.5 font-semibold">
-                            <CheckCircle2 size={15} />
-                            Mission acceptée ! Client notifié du séquestre.
-                          </span>
-                          <div className="flex gap-2 mt-1">
-                            <Link
-                              href={`/mission/${demand.id}/active`}
-                              className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-up-gold py-2 text-xs font-bold text-up-black hover:bg-up-gold-soft"
-                            >
-                              <Compass size={13} />
-                              <span>Suivre la mission en direct</span>
-                            </Link>
-                            <button
-                              type="button"
-                              onClick={() => setIsOtpModalOpen(true)}
-                              className="rounded-lg bg-emerald-500 px-3 py-2 text-xs font-bold text-up-black hover:bg-emerald-400"
-                            >
-                              Fin / OTP
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleAccept(demand)}
-                            className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-up-gold py-2.5 text-xs font-bold text-up-black transition hover:bg-up-gold-soft shadow-[0_0_15px_rgba(212,175,55,0.3)]"
-                          >
-                            <Check size={14} />
-                            <span>Accepter la mission</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => declineRadarDemand(demand.id)}
-                            className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-white/10 py-2.5 text-xs font-medium text-up-gray hover:text-up-white hover:border-white/20"
-                          >
-                            <X size={14} />
-                            <span>Décliner</span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </article>
-                );
-              })
-            )}
-            </div>
-          </section>
-        </main>
-
-        {/* Modal de Demande de Virement Mobile Money */}
-        {isWithdrawModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-up-black/85 p-5 backdrop-blur-md animate-in fade-in">
-            <div className="w-full max-w-sm rounded-3xl border border-up-gold/50 bg-up-surface p-6 text-center shadow-2xl">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-up-gold">
-                  <Wallet size={16} />
-                  Virement Mobile Money
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setIsWithdrawModalOpen(false)}
-                  className="text-up-gray hover:text-up-white"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              {withdrawSuccessMsg ? (
-                <div className="my-5 text-center space-y-3">
-                  <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-500/20 text-emerald-400">
-                    <CheckCircle2 size={30} />
-                  </span>
-                  <h3 className="font-display text-lg font-bold text-up-white">
-                    Virement Effectué !
-                  </h3>
-                  <p className="text-xs text-up-gray">{withdrawSuccessMsg}</p>
-                  <button
-                    type="button"
-                    onClick={() => setIsWithdrawModalOpen(false)}
-                    className="mt-4 w-full rounded-xl bg-up-gold py-2.5 text-xs font-bold text-up-black"
-                  >
-                    Fermer
-                  </button>
-                </div>
-              ) : (
-                <form
-                  onSubmit={handleWithdrawSubmit}
-                  className="mt-4 space-y-4 text-left"
-                >
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-up-gold">
-                      Opérateur de destination
-                    </label>
-                    <div className="mt-2 grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOperator("airtel_money");
-                          setWithdrawPhone("074123456");
-                        }}
-                        className={`rounded-xl border p-3 text-center text-xs font-bold transition ${
-                          operator === "airtel_money"
-                            ? "border-red-500 bg-red-950/40 text-up-white"
-                            : "border-white/10 bg-up-black/40 text-up-gray"
-                        }`}
-                      >
-                        Airtel Money (074/076/077)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOperator("moov_money");
-                          setWithdrawPhone("062123456");
-                        }}
-                        className={`rounded-xl border p-3 text-center text-xs font-bold transition ${
-                          operator === "moov_money"
-                            ? "border-cyan-500 bg-cyan-950/40 text-up-white"
-                            : "border-white/10 bg-up-black/40 text-up-gray"
-                        }`}
-                      >
-                        Moov Money (062/065/066)
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="companion-withdraw-phone"
-                      className="block text-xs font-semibold uppercase tracking-wider text-up-gray"
-                    >
-                      Numéro Mobile Money
-                    </label>
-                    <div className="relative mt-1 flex items-center">
-                      <span className="absolute left-3.5 text-xs font-bold text-up-gray">
-                        +241
-                      </span>
-                      <input
-                        id="companion-withdraw-phone"
-                        type="tel"
-                        value={withdrawPhone}
-                        onChange={(e) => setWithdrawPhone(e.target.value)}
-                        required
-                        className="w-full rounded-xl border border-white/10 bg-up-black/60 py-2.5 pl-14 pr-3 text-xs text-up-white focus:border-up-gold focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="companion-withdraw-amount"
-                      className="block text-xs font-semibold uppercase tracking-wider text-up-gray"
-                    >
-                      Montant du virement (FCFA)
-                    </label>
-                    <input
-                      id="companion-withdraw-amount"
-                      type="number"
-                      value={withdrawAmount}
-                      onChange={(e) => setWithdrawAmount(e.target.value)}
-                      max={balance}
-                      min={1000}
-                      required
-                      className="mt-1 w-full rounded-xl border border-white/10 bg-up-black/60 p-2.5 text-xs font-bold text-up-white focus:border-up-gold focus:outline-none"
-                    />
-                    <span className="text-[10px] text-up-gray mt-1 block">
-                      Solde max : {balance.toLocaleString("fr-FR")} FCFA
+        {radarDemands.length > 0 ? (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {radarDemands.map((demand) => (
+              <div
+                key={demand.id}
+                className="rounded-3xl border border-[#F0E6F3] bg-white p-6 shadow-xs space-y-4 hover:border-up-300 transition"
+              >
+                <div className="flex items-center justify-between border-b border-[#F0E6F3] pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-xs text-[#1D0F24]">
+                      {demand.clientName}
                     </span>
+                    {demand.clientVerified && (
+                      <BadgeCheck size={14} className="text-emerald-500" />
+                    )}
                   </div>
-
-                  <div className="flex gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setIsWithdrawModalOpen(false)}
-                      className="flex-1 rounded-xl border border-white/10 py-3 text-xs font-medium text-up-gray hover:text-up-white"
-                    >
-                      Annuler
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={
-                        isWithdrawProcessing ||
-                        parseInt(withdrawAmount, 10) > balance
-                      }
-                      className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-up-gold py-3 text-xs font-bold text-up-black hover:bg-up-gold-soft disabled:opacity-50"
-                    >
-                      {isWithdrawProcessing ? (
-                        <RefreshCw size={14} className="animate-spin" />
-                      ) : (
-                        <ArrowUpRight size={14} />
-                      )}
-                      <span>Transférer</span>
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Modal de Saisie OTP de fin de mission */}
-        {isOtpModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-up-black/85 p-5 backdrop-blur-md animate-in fade-in">
-            <div className="w-full max-w-sm rounded-3xl border border-up-gold/50 bg-up-surface p-6 text-center shadow-2xl">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-up-gold">
-                  <ShieldCheck size={16} />
-                  Validation des Honoraires
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setIsOtpModalOpen(false)}
-                  className="text-up-gray hover:text-up-white"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              {otpSuccessMsg ? (
-                <div className="my-5 text-center space-y-3">
-                  <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-500/20 text-emerald-400">
-                    <CheckCircle2 size={30} />
+                  <span className="font-bold text-sm text-up-700">
+                    +{demand.netEarnings.toLocaleString("fr-FR")} FCFA
                   </span>
-                  <h3 className="font-display text-lg font-bold text-up-white">
-                    Honoraires Débloqués !
-                  </h3>
-                  <p className="text-xs text-up-gray">{otpSuccessMsg}</p>
+                </div>
+
+                <div className="space-y-1.5 text-xs text-[#6B5D73]">
+                  <p className="flex items-center gap-2 text-[#1D0F24] font-semibold">
+                    <Clock size={13} className="text-up-500" />
+                    <span>{demand.date} · {demand.time} ({demand.durationHours}h)</span>
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <Building2 size={13} className="text-up-500" />
+                    <span className="truncate">{demand.venueName}</span>
+                  </p>
+                  <p className="flex items-center gap-2 text-[11px]">
+                    <MapPin size={13} className="text-[#6B5D73]" />
+                    <span>{demand.venueZone}</span>
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 pt-2">
                   <button
                     type="button"
-                    onClick={() => setIsOtpModalOpen(false)}
-                    className="mt-4 w-full rounded-xl bg-up-gold py-2.5 text-xs font-bold text-up-black"
+                    onClick={() => handleAccept(demand)}
+                    className="flex-1 rounded-full bg-up-500 text-white hover:bg-up-600 shadow-md shadow-up-500/20 active:scale-[0.98] py-2.5 text-xs font-bold transition"
                   >
-                    Fermer
+                    Accepter la mission
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => declineRadarDemand(demand.id)}
+                    className="rounded-full border border-up-200 px-4 py-2.5 text-xs font-semibold text-[#6B5D73] hover:text-red-600 hover:border-red-200"
+                  >
+                    Décliner
                   </button>
                 </div>
-              ) : (
-                <form
-                  onSubmit={handleOtpVerification}
-                  className="mt-4 space-y-4 text-left"
-                >
-                  <p className="text-xs text-up-gray">
-                    Saisissez le code OTP à 4 chiffres que le client vous a
-                    communiqué à la fin de votre prestation pour débloquer
-                    instantanément vos honoraires.
-                  </p>
-
-                  <div>
-                    <label
-                      htmlFor="companion-otp-input"
-                      className="block text-[11px] font-semibold uppercase tracking-wider text-up-gold"
-                    >
-                      Code OTP (4 chiffres)
-                    </label>
-                    <input
-                      id="companion-otp-input"
-                      type="text"
-                      maxLength={6}
-                      value={enteredOtp}
-                      onChange={(e) => setEnteredOtp(e.target.value)}
-                      placeholder="4829"
-                      required
-                      className="mt-1.5 w-full rounded-xl border border-white/10 bg-up-black/60 py-3 text-center font-mono text-xl font-bold tracking-[0.25em] text-up-white focus:border-up-gold focus:outline-none"
-                    />
-                  </div>
-
-                  {otpErrorMsg && (
-                    <p className="rounded-xl border border-red-500/30 bg-red-500/10 p-2.5 text-xs text-red-400">
-                      {otpErrorMsg}
-                    </p>
-                  )}
-
-                  <div className="flex gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setIsOtpModalOpen(false)}
-                      className="flex-1 rounded-xl border border-white/10 py-3 text-xs font-medium text-up-gray hover:text-up-white"
-                    >
-                      Annuler
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={otpProcessing || (enteredOtp.length !== 4 && enteredOtp.length !== 6)}
-                      className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-3 text-xs font-bold text-up-black hover:bg-emerald-400 disabled:opacity-50"
-                    >
-                      {otpProcessing ? (
-                        <RefreshCw size={14} className="animate-spin" />
-                      ) : (
-                        <CheckCircle2 size={14} />
-                      )}
-                      <span>Débloquer fonds</span>
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-3xl border border-[#F0E6F3] bg-white p-8 text-center">
+            <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-up-50 text-up-600">
+              <Radio size={24} />
+            </span>
+            <h4 className="mt-3 font-display text-base font-bold text-[#1D0F24]">
+              Radar actif en veille
+            </h4>
+            <p className="mt-1 text-xs text-[#6B5D73] max-w-sm mx-auto">
+              Gardez votre statut en ligne activé. Dès qu&apos;un client sélectionne votre profil pour un dîner d&apos;affaires ou événement, la notification apparaîtra ici.
+            </p>
           </div>
         )}
-      </div>
-    </PersonaShell>
+      </section>
+
+      {/* ===================================================================
+          3. VALIDATION DE FIN DE MISSION AVEC CODE OTP
+          =================================================================== */}
+      <section id="otp" className="rounded-3xl border border-[#F0E6F3] bg-white p-6 sm:p-8 shadow-xs">
+        <div className="flex items-center gap-3 border-b border-[#F0E6F3] pb-4">
+          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-up-50 text-up-600">
+            <KeyRound size={20} />
+          </span>
+          <div>
+            <h3 className="font-display text-base font-bold text-[#1D0F24]">
+              Clôturer une Mission &amp; Débloquer le Séquestre
+            </h3>
+            <p className="text-xs text-[#6B5D73]">
+              Saisissez le code OTP à 6 chiffres communiqué par le client à la fin de la rencontre
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handleOtpVerification} className="mt-6 space-y-4 max-w-md">
+          {otpSuccessMsg && (
+            <div className="rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-xs font-semibold text-emerald-700">
+              {otpSuccessMsg}
+            </div>
+          )}
+          {otpErrorMsg && (
+            <div className="rounded-2xl border border-red-300 bg-red-50 p-4 text-xs font-semibold text-red-700">
+              {otpErrorMsg}
+            </div>
+          )}
+
+          <div>
+            <label className="block text-xs font-bold text-[#1D0F24] mb-1.5">
+              Code OTP de libération (fourni par le client)
+            </label>
+            <input
+              type="text"
+              maxLength={6}
+              value={enteredOtp}
+              onChange={(e) => setEnteredOtp(e.target.value)}
+              placeholder="ex: 482910"
+              required
+              className="w-full rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] p-3 text-center font-mono text-base font-bold tracking-widest text-[#1D0F24] focus:border-up-500 focus:outline-none"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={otpProcessing || enteredOtp.length < 6}
+            className="w-full rounded-full bg-up-500 hover:bg-up-600 py-3.5 text-xs font-bold text-white shadow-md shadow-up-500/20 active:scale-[0.98] transition disabled:opacity-50"
+          >
+            {otpProcessing ? "Validation en cours..." : "Valider la fin de mission & Débloquer les fonds"}
+          </button>
+        </form>
+      </section>
+
+      {/* Modal de Retrait Mobile Money */}
+      {isWithdrawModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1D0F24]/60 p-4 backdrop-blur-md animate-in fade-in">
+          <div className="w-full max-w-md rounded-3xl border border-[#F0E6F3] bg-white p-6 sm:p-8 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#F0E6F3] pb-4">
+              <h3 className="font-display text-lg font-bold text-[#1D0F24]">
+                Retrait Mobile Money
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsWithdrawModalOpen(false)}
+                className="grid h-8 w-8 place-items-center rounded-full text-[#6B5D73] hover:text-[#1D0F24]"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {withdrawSuccessMsg ? (
+              <div className="mt-6 text-center space-y-4">
+                <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+                  <CheckCircle2 size={32} />
+                </span>
+                <p className="text-xs font-semibold text-[#1D0F24]">
+                  {withdrawSuccessMsg}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsWithdrawModalOpen(false);
+                    setWithdrawSuccessMsg(null);
+                  }}
+                  className="w-full rounded-full bg-up-500 hover:bg-up-600 py-3 text-xs font-bold text-white shadow-xs"
+                >
+                  Fermer
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleWithdrawSubmit} className="mt-6 space-y-4 text-xs">
+                <div>
+                  <label className="block font-bold text-[#1D0F24] mb-1.5">
+                    Opérateur
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setOperator("airtel_money")}
+                      className={`rounded-xl border py-2.5 font-bold transition ${
+                        operator === "airtel_money"
+                          ? "border-up-500 bg-up-50 text-up-700"
+                          : "border-[#F0E6F3] text-[#6B5D73]"
+                      }`}
+                    >
+                      Airtel Money
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOperator("moov_money")}
+                      className={`rounded-xl border py-2.5 font-bold transition ${
+                        operator === "moov_money"
+                          ? "border-up-500 bg-up-50 text-up-700"
+                          : "border-[#F0E6F3] text-[#6B5D73]"
+                      }`}
+                    >
+                      Moov Money
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-[#1D0F24] mb-1.5">
+                    Numéro Gabon (+241)
+                  </label>
+                  <input
+                    type="tel"
+                    value={withdrawPhone}
+                    onChange={(e) => setWithdrawPhone(e.target.value)}
+                    required
+                    className="w-full rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] p-3 text-xs text-[#1D0F24] font-bold focus:border-up-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-[#1D0F24] mb-1.5">
+                    Montant à retirer (FCFA)
+                  </label>
+                  <input
+                    type="number"
+                    value={withdrawAmount}
+                    onChange={(e) => setWithdrawAmount(e.target.value)}
+                    max={balance}
+                    min={1000}
+                    required
+                    className="w-full rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] p-3 text-xs text-[#1D0F24] font-bold focus:border-up-500 focus:outline-none"
+                  />
+                  <p className="mt-1 text-[10px] text-[#6B5D73]">
+                    Solde maximum retirable : {balance.toLocaleString("fr-FR")} FCFA
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isWithdrawProcessing || balance <= 0}
+                  className="w-full rounded-full bg-up-500 hover:bg-up-600 py-3.5 text-xs font-bold text-white shadow-md shadow-up-500/20 active:scale-[0.98] transition disabled:opacity-50"
+                >
+                  {isWithdrawProcessing ? "Traitement du virement..." : "Confirmer le virement"}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal Acceptation de mission */}
+      {acceptedDemand && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1D0F24]/60 p-4 backdrop-blur-md animate-in fade-in">
+          <div className="w-full max-w-md rounded-3xl border border-[#F0E6F3] bg-white p-6 sm:p-8 text-center shadow-2xl space-y-4">
+            <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+              <CheckCircle2 size={30} />
+            </span>
+            <h3 className="font-display text-lg font-bold text-[#1D0F24]">
+              Mission Acceptée avec Succès !
+            </h3>
+            <p className="text-xs text-[#6B5D73] leading-relaxed">
+              Vous avez accepté la demande de <strong>{acceptedDemand.clientName}</strong> pour le <strong>{acceptedDemand.date}</strong> à <strong>{acceptedDemand.time}</strong> au <strong>{acceptedDemand.venueName}</strong>.
+            </p>
+            <p className="rounded-xl bg-up-50 p-3 text-[11px] text-up-700 font-semibold border border-up-200">
+              Gain net garanti sous séquestre : {acceptedDemand.netEarnings.toLocaleString("fr-FR")} FCFA
+            </p>
+            <button
+              type="button"
+              onClick={() => setAcceptedDemand(null)}
+              className="w-full rounded-full bg-up-500 hover:bg-up-600 py-3 text-xs font-bold text-white shadow-xs transition"
+            >
+              Compris, j&apos;y serai
+            </button>
+          </div>
+        </div>
+      )}
+    </DashboardShell>
   );
 }

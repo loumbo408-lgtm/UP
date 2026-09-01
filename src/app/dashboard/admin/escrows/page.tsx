@@ -112,23 +112,24 @@ export default function AdminEscrowsDisputesPage() {
   };
 
   return (
-    <main className="px-5 pt-4 space-y-4">
+    <main className="min-h-dvh bg-[#FAF9FB] p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
       {/* En-tête de la page */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-white/10 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#F0E6F3] pb-6">
         <div>
-          <span className="text-[10px] uppercase font-bold tracking-widest text-up-gold">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-up-200 bg-up-50 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-up-700">
+            <Lock size={12} />
             Gouvernance Financière &amp; Tiers de Confiance
           </span>
-          <h1 className="font-display text-2xl font-bold text-up-white">
+          <h1 className="mt-2 font-display text-2xl font-bold text-[#1D0F24] sm:text-3xl">
             Supervision des Séquestres &amp; Litiges
           </h1>
-          <p className="text-xs text-up-gray">
+          <p className="text-xs text-[#6B5D73]">
             Surveillance des flux Airtel Money / Moov Money et arbitrage souverain des contestations.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="rounded-2xl border border-up-gold/40 bg-up-gold/15 px-3.5 py-1.5 font-display text-sm font-bold text-up-gold shadow">
+          <span className="rounded-full border border-up-200 bg-up-50 px-4 py-2 font-display text-sm font-bold text-up-700 shadow-xs">
             {hydrated ? totalHeldAmountXaf.toLocaleString("fr-FR") : "—"} FCFA
             consignés
           </span>
@@ -137,15 +138,15 @@ export default function AdminEscrowsDisputesPage() {
 
       {/* Toast de confirmation d'arbitrage */}
       {arbitrationToast && (
-        <div className="rounded-2xl border border-emerald-500/40 bg-emerald-950/40 p-3.5 text-xs text-emerald-300 flex items-center justify-between shadow-xl animate-in fade-in">
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-xs text-emerald-700 flex items-center justify-between shadow-xs animate-in fade-in">
           <div className="flex items-center gap-2 font-medium">
-            <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+            <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
             <span>{arbitrationToast}</span>
           </div>
           <button
             type="button"
             onClick={() => setArbitrationToast(null)}
-            className="text-emerald-400/80 hover:text-emerald-300"
+            className="text-emerald-600 hover:text-emerald-800"
           >
             <X size={15} />
           </button>
@@ -153,23 +154,23 @@ export default function AdminEscrowsDisputesPage() {
       )}
 
       {/* Barre de recherche et filtres */}
-      <div className="flex flex-col sm:flex-row gap-2.5">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search
-            size={15}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-up-gray"
+            size={16}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6B5D73]"
           />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher par client, prestataire, référence UP-ESCROW..."
-            className="w-full rounded-2xl border border-white/10 bg-up-surface py-2.5 pl-10 pr-4 text-xs text-up-white placeholder-up-gray focus:border-up-gold focus:outline-none"
+            className="w-full rounded-2xl border border-[#F0E6F3] bg-white py-2.5 pl-10 pr-4 text-xs text-[#1D0F24] focus:border-up-500 focus:outline-none shadow-xs"
           />
         </div>
 
         {/* Filtres de statut */}
-        <div className="flex rounded-2xl border border-white/10 bg-up-surface p-1 overflow-x-auto scrollbar-none">
+        <div className="flex rounded-full border border-[#F0E6F3] bg-white p-1 shadow-xs overflow-x-auto scrollbar-none">
           {[
             { id: "all", label: "Tous" },
             { id: "disputed", label: "⚠️ Litiges (1)" },
@@ -181,10 +182,10 @@ export default function AdminEscrowsDisputesPage() {
               key={tab.id}
               type="button"
               onClick={() => setFilter(tab.id as EscrowFilter)}
-              className={`shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
+              className={`shrink-0 rounded-full px-3.5 py-1 text-xs font-semibold transition ${
                 filter === tab.id
-                  ? "bg-up-gold text-up-black shadow"
-                  : "text-up-gray hover:text-up-white"
+                  ? "bg-up-500 text-white shadow-xs"
+                  : "text-[#6B5D73] hover:text-[#1D0F24]"
               }`}
             >
               {tab.label}
@@ -194,7 +195,7 @@ export default function AdminEscrowsDisputesPage() {
       </div>
 
       {/* Grille : Liste des Séquestres (Gauche) + Détails & Outils d'Arbitrage (Droite) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Colonne Gauche : Liste des transactions (5 colonnes) */}
         <div className="lg:col-span-5 space-y-2.5 max-h-[680px] overflow-y-auto pr-1">
           {filteredEscrows.length > 0 ? (
@@ -211,33 +212,33 @@ export default function AdminEscrowsDisputesPage() {
                   onClick={() => setSelectedEscrow(esc)}
                   className={`cursor-pointer rounded-2xl border p-4 transition-all ${
                     isSelected
-                      ? "border-up-gold bg-gradient-to-r from-up-gold/15 to-up-surface shadow-xl"
-                      : "border-white/10 bg-up-surface hover:border-white/20"
+                      ? "border-up-500 bg-up-50 shadow-xs"
+                      : "border-[#F0E6F3] bg-white hover:border-up-200"
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-2 border-b border-white/5 pb-2.5">
+                  <div className="flex items-start justify-between gap-2 border-b border-[#F0E6F3] pb-2.5">
                     <div>
-                      <span className="font-mono text-[10px] text-up-gray block">
+                      <span className="font-mono text-[10px] text-[#6B5D73] block">
                         {esc.transactionRef}
                       </span>
-                      <p className="font-semibold text-xs text-up-white mt-0.5">
+                      <p className="font-bold text-xs text-[#1D0F24] mt-0.5">
                         {esc.clientName} ➔ {esc.companionName}
                       </p>
                     </div>
 
                     <div className="text-right">
-                      <span className="font-display text-sm font-bold text-up-gold">
+                      <span className="font-display text-sm font-bold text-[#1D0F24]">
                         {esc.totalAmountXaf.toLocaleString("fr-FR")} FCFA
                       </span>
                       <span
                         className={`block text-[9px] font-bold uppercase ${
                           isDisputed
-                            ? "text-red-400"
+                            ? "text-red-600"
                             : isHeld
-                              ? "text-amber-400"
+                              ? "text-amber-600"
                               : isReleased
-                                ? "text-emerald-400"
-                                : "text-cyan-400"
+                                ? "text-emerald-600"
+                                : "text-up-700"
                         }`}
                       >
                         {isDisputed
@@ -251,12 +252,12 @@ export default function AdminEscrowsDisputesPage() {
                     </div>
                   </div>
 
-                  <div className="mt-2.5 flex items-center justify-between text-[11px] text-up-gray">
-                    <span className="flex items-center gap-1 text-up-white">
-                      <MapPin size={12} className="text-up-gold" />
+                  <div className="mt-2.5 flex items-center justify-between text-[11px] text-[#6B5D73]">
+                    <span className="flex items-center gap-1 text-[#1D0F24]">
+                      <MapPin size={12} className="text-up-500" />
                       <span>{esc.venueName}</span>
                     </span>
-                    <span className="flex items-center gap-1 font-semibold text-up-gray">
+                    <span className="flex items-center gap-1 font-semibold text-[#6B5D73]">
                       <Smartphone size={12} />
                       <span>
                         {esc.paymentOperator === "airtel_money" ? "Airtel" : "Moov"}
@@ -267,7 +268,7 @@ export default function AdminEscrowsDisputesPage() {
               );
             })
           ) : (
-            <div className="rounded-2xl border border-white/10 bg-up-surface p-8 text-center text-xs text-up-gray">
+            <div className="rounded-2xl border border-[#F0E6F3] bg-white p-8 text-center text-xs text-[#6B5D73]">
               Aucune transaction de séquestre ne correspond à ces critères.
             </div>
           )}
@@ -275,14 +276,14 @@ export default function AdminEscrowsDisputesPage() {
 
         {/* Colonne Droite : Console d'Arbitrage et Journal d'Audit (7 colonnes) */}
         {selectedEscrow ? (
-          <div className="lg:col-span-7 rounded-3xl border border-white/10 bg-up-surface p-5 shadow-2xl space-y-5">
+          <div className="lg:col-span-7 rounded-3xl border border-[#F0E6F3] bg-white p-6 shadow-xs space-y-5">
             {/* Header du dossier séquestre */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-white/10 pb-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[#F0E6F3] pb-3.5">
               <div>
-                <span className="text-[10px] uppercase font-bold text-up-gray block">
+                <span className="text-[10px] uppercase font-bold text-[#6B5D73] block">
                   Dossier de Séquestre · Réf {selectedEscrow.transactionRef}
                 </span>
-                <h2 className="font-display text-lg font-bold text-up-white">
+                <h2 className="font-display text-lg font-bold text-[#1D0F24]">
                   {selectedEscrow.clientName} ⇄ {selectedEscrow.companionName}
                 </h2>
               </div>
@@ -290,10 +291,10 @@ export default function AdminEscrowsDisputesPage() {
               <span
                 className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${
                   selectedEscrow.status === "disputed"
-                    ? "border border-red-500/50 bg-red-500/20 text-red-300 animate-pulse"
+                    ? "border border-red-200 bg-red-50 text-red-700 animate-pulse"
                     : selectedEscrow.status === "held"
-                      ? "border border-amber-500/50 bg-amber-500/20 text-amber-300"
-                      : "border border-emerald-500/50 bg-emerald-500/20 text-emerald-300"
+                      ? "border border-amber-200 bg-amber-50 text-amber-700"
+                      : "border border-emerald-200 bg-emerald-50 text-emerald-700"
                 }`}
               >
                 {selectedEscrow.status === "disputed"
@@ -305,48 +306,48 @@ export default function AdminEscrowsDisputesPage() {
             </div>
 
             {/* Répartition Financière */}
-            <div className="grid grid-cols-3 gap-2 rounded-2xl border border-white/10 bg-up-black/50 p-3.5 text-center">
+            <div className="grid grid-cols-3 gap-2 rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] p-3.5 text-center">
               <div>
-                <span className="text-[10px] text-up-gray block">Total Débité</span>
-                <span className="font-display text-sm font-bold text-up-white">
+                <span className="text-[10px] text-[#6B5D73] block">Total Débité</span>
+                <span className="font-display text-sm font-bold text-[#1D0F24]">
                   {selectedEscrow.totalAmountXaf.toLocaleString("fr-FR")} FCFA
                 </span>
               </div>
-              <div className="border-x border-white/10 px-2">
-                <span className="text-[10px] text-up-gray block">Part Prestataire</span>
-                <span className="font-display text-sm font-bold text-emerald-400">
+              <div className="border-x border-[#F0E6F3] px-2">
+                <span className="text-[10px] text-[#6B5D73] block">Part Prestataire</span>
+                <span className="font-display text-sm font-bold text-emerald-600">
                   {selectedEscrow.companionFeeXaf.toLocaleString("fr-FR")} FCFA
                 </span>
               </div>
               <div>
-                <span className="text-[10px] text-up-gray block">Commission UP (10%)</span>
-                <span className="font-display text-sm font-bold text-up-gold">
+                <span className="text-[10px] text-[#6B5D73] block">Commission UP (10%)</span>
+                <span className="font-display text-sm font-bold text-up-700">
                   {selectedEscrow.platformFeeXaf.toLocaleString("fr-FR")} FCFA
                 </span>
               </div>
             </div>
 
             {/* Détails du Rendez-vous en Lieu Public */}
-            <div className="rounded-2xl border border-white/10 bg-up-black/50 p-4 space-y-2 text-xs text-up-gray">
+            <div className="rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] p-4 space-y-2 text-xs text-[#6B5D73]">
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-up-white font-semibold">
-                  <MapPin size={14} className="text-up-gold" />
+                <span className="flex items-center gap-1.5 text-[#1D0F24] font-semibold">
+                  <MapPin size={14} className="text-up-500" />
                   <span>{selectedEscrow.venueName}</span>
                 </span>
-                <span className="text-up-gold-soft font-mono">
+                <span className="text-up-700 font-mono font-semibold">
                   {selectedEscrow.venueZone}
                 </span>
               </div>
-              <p className="flex items-center gap-2">
-                <Clock size={13} className="text-up-gold" />
+              <p className="flex items-center gap-2 text-[#1D0F24]">
+                <Clock size={13} className="text-up-500" />
                 <span>
                   Date &amp; Heure : {selectedEscrow.date} à {selectedEscrow.time} ({selectedEscrow.durationHours}h prévues)
                 </span>
               </p>
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 text-[11px]">
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#F0E6F3] text-[11px]">
                 <div>
-                  <span className="text-up-gray block">Client Mobile Money :</span>
-                  <span className="font-mono text-up-white">
+                  <span className="text-[#6B5D73] block">Client Mobile Money :</span>
+                  <span className="font-mono font-semibold text-[#1D0F24]">
                     {selectedEscrow.clientPhone} (
                     {selectedEscrow.paymentOperator === "airtel_money"
                       ? "Airtel Money"
@@ -355,8 +356,8 @@ export default function AdminEscrowsDisputesPage() {
                   </span>
                 </div>
                 <div>
-                  <span className="text-up-gray block">Prestataire Mobile Money :</span>
-                  <span className="font-mono text-up-white">
+                  <span className="text-[#6B5D73] block">Prestataire Mobile Money :</span>
+                  <span className="font-mono font-semibold text-[#1D0F24]">
                     {selectedEscrow.companionPhone}
                   </span>
                 </div>
@@ -365,22 +366,22 @@ export default function AdminEscrowsDisputesPage() {
 
             {/* Section Litige & Réclamation */}
             {selectedEscrow.disputeReason && (
-              <div className="rounded-2xl border border-red-500/40 bg-red-950/30 p-4 space-y-2 text-xs">
-                <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-red-400">
+              <div className="rounded-2xl border border-red-200 bg-red-50 p-4 space-y-2 text-xs">
+                <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-red-700">
                   <AlertTriangle size={15} />
                   Motif de la contestation / litige
                 </span>
-                <p className="text-red-200 leading-relaxed">
+                <p className="text-red-900 leading-relaxed font-medium">
                   {selectedEscrow.disputeReason}
                 </p>
 
                 {selectedEscrow.arbitrationLog && (
-                  <div className="mt-3 space-y-1 rounded-xl bg-up-black/60 p-3 border border-white/5">
-                    <span className="text-[10px] uppercase font-bold text-up-gray block">
+                  <div className="mt-3 space-y-1 rounded-xl bg-white p-3 border border-red-200">
+                    <span className="text-[10px] uppercase font-bold text-[#6B5D73] block">
                       Journal des démarches conciergerie :
                     </span>
                     {selectedEscrow.arbitrationLog.map((log, i) => (
-                      <p key={i} className="text-[11px] text-up-gray">
+                      <p key={i} className="text-[11px] text-[#6B5D73]">
                         • {log}
                       </p>
                     ))}
@@ -392,12 +393,12 @@ export default function AdminEscrowsDisputesPage() {
             {/* OUTIL D'ARBITRAGE SOUVERAIN UP (Boutons d'action) */}
             {(selectedEscrow.status === "held" ||
               selectedEscrow.status === "disputed") && (
-              <div className="rounded-2xl border border-up-gold/40 bg-gradient-to-br from-up-gold/15 via-up-surface to-up-surface p-4 space-y-3">
-                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-up-gold">
+              <div className="rounded-2xl border border-up-200 bg-up-50 p-4 space-y-3">
+                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-up-700">
                   <Scale size={15} />
                   Outils d&apos;Arbitrage Souverain UP
                 </span>
-                <p className="text-xs text-up-gray leading-relaxed">
+                <p className="text-xs text-[#6B5D73] leading-relaxed">
                   En tant qu&apos;officier de modération, vous avez l&apos;autorité
                   pour clore le litige et trancher la destination des fonds séquestrés.
                 </p>
@@ -412,7 +413,7 @@ export default function AdminEscrowsDisputesPage() {
                         "Prestation attestée au lieu public certifié. Clôture en faveur du prestataire.",
                       );
                     }}
-                    className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-3 text-xs font-bold text-up-black transition hover:bg-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                    className="flex items-center justify-center gap-1.5 rounded-full bg-emerald-600 py-3 text-xs font-bold text-white transition hover:bg-emerald-700 shadow-xs"
                   >
                     <CheckCircle2 size={15} />
                     <span>Forcer le déblocage prestataire</span>
@@ -427,7 +428,7 @@ export default function AdminEscrowsDisputesPage() {
                         "Incident avéré ou lieu non conforme. Remboursement intégral du client sur son compte Mobile Money.",
                       );
                     }}
-                    className="flex items-center justify-center gap-1.5 rounded-xl border border-red-500/50 bg-red-500/20 py-3 text-xs font-bold text-red-300 transition hover:bg-red-500/30"
+                    className="flex items-center justify-center gap-1.5 rounded-full border border-red-300 bg-white py-3 text-xs font-bold text-red-700 transition hover:bg-red-50"
                   >
                     <RotateCcw size={15} />
                     <span>Rembourser intégralement le client</span>
@@ -441,17 +442,17 @@ export default function AdminEscrowsDisputesPage() {
 
       {/* Modal de Confirmation d'Arbitrage */}
       {arbitrationAction && selectedEscrow && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-up-black/85 p-5 backdrop-blur-md animate-in fade-in">
-          <div className="w-full max-w-md rounded-3xl border border-up-gold/50 bg-up-surface p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-up-gold">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1D0F24]/60 p-5 backdrop-blur-md animate-in fade-in">
+          <div className="w-full max-w-md rounded-3xl border border-[#F0E6F3] bg-white p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#F0E6F3] pb-3">
+              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-up-700">
                 <Scale size={16} />
                 Confirmation de la Décision d&apos;Arbitrage
               </span>
               <button
                 type="button"
                 onClick={() => setArbitrationAction(null)}
-                className="text-up-gray hover:text-up-white"
+                className="text-[#6B5D73] hover:text-[#1D0F24]"
               >
                 <X size={18} />
               </button>
@@ -461,8 +462,8 @@ export default function AdminEscrowsDisputesPage() {
               <div
                 className={`rounded-2xl border p-4 text-xs ${
                   arbitrationAction === "force_release"
-                    ? "border-emerald-500/40 bg-emerald-950/30 text-emerald-300"
-                    : "border-red-500/40 bg-red-950/30 text-red-300"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                    : "border-red-200 bg-red-50 text-red-800"
                 }`}
               >
                 <p className="font-bold">
@@ -478,7 +479,7 @@ export default function AdminEscrowsDisputesPage() {
               <div>
                 <label
                   htmlFor="arbitration-official-note"
-                  className="block text-[11px] font-semibold uppercase tracking-wider text-up-gray"
+                  className="block text-[11px] font-semibold uppercase tracking-wider text-[#6B5D73]"
                 >
                   Motif officiel consigné au registre d&apos;arbitrage
                 </label>
@@ -488,7 +489,7 @@ export default function AdminEscrowsDisputesPage() {
                   value={arbitrationNote}
                   onChange={(e) => setArbitrationNote(e.target.value)}
                   required
-                  className="mt-1 w-full rounded-xl border border-white/10 bg-up-black/60 p-2.5 text-xs text-up-white placeholder-up-gray focus:border-up-gold focus:outline-none"
+                  className="mt-1 w-full rounded-xl border border-[#F0E6F3] bg-[#FAF9FB] p-2.5 text-xs text-[#1D0F24] focus:border-up-500 focus:outline-none"
                 />
               </div>
 
@@ -496,17 +497,17 @@ export default function AdminEscrowsDisputesPage() {
                 <button
                   type="button"
                   onClick={() => setArbitrationAction(null)}
-                  className="flex-1 rounded-xl border border-white/10 py-3 text-xs font-semibold text-up-gray hover:text-up-white"
+                  className="flex-1 rounded-full border border-[#F0E6F3] py-3 text-xs font-semibold text-[#6B5D73] hover:text-[#1D0F24]"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={isProcessingArbitration || !arbitrationNote.trim()}
-                  className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-3 text-xs font-bold transition ${
+                  className={`flex-1 flex items-center justify-center gap-1.5 rounded-full py-3 text-xs font-bold transition shadow-xs ${
                     arbitrationAction === "force_release"
-                      ? "bg-emerald-500 text-up-black hover:bg-emerald-400"
-                      : "bg-red-500 text-up-white hover:bg-red-400"
+                      ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                      : "bg-red-600 text-white hover:bg-red-700"
                   }`}
                 >
                   {isProcessingArbitration ? (

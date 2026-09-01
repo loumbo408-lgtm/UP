@@ -1,19 +1,37 @@
 @import "tailwindcss";
 
 /* =====================================================================
-   Charte Graphique UP Gabon — Direction Artistique & Mobile Web App
+   Charte Graphique Officielle UP Gabon — VIOLET ROYAL (#8807A8)
+   Palette Officielle :
+   - Violet UP officiel (Primary)     : #8807A8
+   - Violet soutenu hover             : #780395
+   - Violet foncé contrasté           : #58026D
+   - Violet lumineux                  : #C616F2
+   - Fond très doux / badges          : #FAF2FB
+   - Bordures accentuées              : #E7ACF5
+   - Fond général très clair          : #FAF9FB
+   - Fond cartes blanches             : #FFFFFF
+   - Texte sombre haute lisibilité    : #1D0F24
+   - Texte secondaire                 : #6B5D73
+   - Séparateurs doux                 : #F0E6F3
    ===================================================================== */
 :root {
-  --up-background: #0B0B0D;
-  --up-surface: #151518;
-  --up-surface-elevated: #202024;
-  --up-gold: #D4AF37;
-  --up-gold-light: #F1D875;
-  --up-text: #FAFAF9;
-  --up-muted: #A1A1AA;
-  --up-border: rgba(212, 175, 55, 0.22);
-  --up-success: #22C55E;
-  --up-danger: #EF4444;
+  --up-primary: #8807A8;          /* Violet UP officiel */
+  --up-primary-hover: #780395;    /* Violet soutenu hover */
+  --up-primary-dark: #58026D;     /* Violet foncé contrasté */
+  --up-primary-light: #C616F2;    /* Violet lumineux */
+  --up-primary-soft: #FAF2FB;     /* Fond très doux / badges */
+  --up-primary-border: #E7ACF5;   /* Bordures accentuées */
+  
+  --up-bg-page: #FAF9FB;          /* Fond général très clair */
+  --up-card-bg: #FFFFFF;          /* Fond cartes blanches */
+  --up-text-main: #1D0F24;        /* Texte sombre haute lisibilité */
+  --up-text-muted: #6B5D73;       /* Texte secondaire */
+  --up-border-subtle: #F0E6F3;    /* Séparateurs doux */
+
+  --up-success: #10B981;          /* Vert émeraude */
+  --up-alert: #F59E0B;            /* Orange ambré */
+  --up-error: #EF4444;            /* Rouge */
 
   /* Safe areas mobile PWA */
   --sat: env(safe-area-inset-top, 0px);
@@ -21,25 +39,35 @@
 }
 
 @theme {
-  /* Fonds */
-  --color-up-background: #0b0b0d;
-  --color-up-black: #0b0b0d;
-  --color-up-surface: #151518;
-  --color-up-surface-elevated: #202024;
+  /* Gamme Complète UP Violet Royal */
+  --color-up-50: #FAF2FB;
+  --color-up-100: #F3DCF8;
+  --color-up-200: #E7ACF5;
+  --color-up-300: #D768F2;
+  --color-up-400: #C616F2;
+  --color-up-500: #8807A8;
+  --color-up-600: #780395;
+  --color-up-700: #58026D;
+  --color-up-800: #3C014A;
+  --color-up-900: #200127;
 
-  /* Accents Or Prestige */
-  --color-up-gold: #d4af37;
-  --color-up-gold-light: #f1d875;
-  --color-up-gold-soft: #f1d875;
+  /* Aliases sémantiques */
+  --color-up-primary: #8807A8;
+  --color-up-primary-hover: #780395;
+  --color-up-primary-dark: #58026D;
+  --color-up-primary-light: #C616F2;
+  --color-up-primary-soft: #FAF2FB;
+  --color-up-primary-border: #E7ACF5;
 
-  /* Typographie & États */
-  --color-up-text: #fafaf9;
-  --color-up-white: #fafaf9;
-  --color-up-muted: #a1a1aa;
-  --color-up-gray: #a1a1aa;
-  --color-up-border: rgba(212, 175, 55, 0.22);
-  --color-up-success: #22c55e;
-  --color-up-danger: #ef4444;
+  --color-up-bg-page: #FAF9FB;
+  --color-up-card-bg: #FFFFFF;
+  --color-up-text-main: #1D0F24;
+  --color-up-text-muted: #6B5D73;
+  --color-up-border-subtle: #F0E6F3;
+
+  --color-up-success: #10B981;
+  --color-up-alert: #F59E0B;
+  --color-up-error: #EF4444;
 
   /* Typographie */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
@@ -49,20 +77,16 @@
 }
 
 @layer base {
-  :root {
-    color-scheme: dark;
-  }
-
   html {
-    background-color: var(--up-background);
-    color: var(--up-text);
+    background-color: var(--up-bg-page);
+    color: var(--up-text-main);
     -webkit-tap-highlight-color: transparent;
     scroll-behavior: smooth;
   }
 
   body {
-    background-color: var(--up-background);
-    color: var(--up-text);
+    background-color: var(--up-bg-page);
+    color: var(--up-text-main);
     min-height: 100dvh;
     overflow-x: hidden;
   }
@@ -75,40 +99,49 @@
     padding-bottom: var(--sab);
   }
 
-  /* Masque la barre de défilement tout en préservant le scroll */
+  /* Barres de défilement subtiles */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #0B0B0D;
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #202024;
+    background: #E7ACF5;
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #D4AF37;
+    background: #8807A8;
   }
 }
 
-/* Utilitaires spécifiques ILLUSTRATION2.webp */
-.glass-pill {
-  background: rgba(21, 21, 24, 0.75);
+/* Utilitaires de cartes et pilules — Style Violet Royal & Blanc */
+.glass-pill-light {
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid #F0E6F3;
 }
 
-.glass-pill-active {
-  background: #D4AF37;
-  color: #0B0B0D;
-  box-shadow: 0 0 15px rgba(212, 175, 55, 0.35);
-  border: 1px solid #F1D875;
+.glass-pill-violet {
+  background: rgba(136, 7, 168, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(136, 7, 168, 0.2);
+  color: #8807A8;
+}
+
+.glass-pill-dark {
+  background: rgba(29, 15, 36, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
 }
 
 .floating-action-btn {
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.2);
+  box-shadow: 0 10px 25px rgba(136, 7, 168, 0.25), 0 0 15px rgba(136, 7, 168, 0.15);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -118,32 +151,4 @@
 
 .floating-action-btn:active {
   transform: scale(0.94);
-}
-
-/* Card stack 3D layers */
-.card-stack-base {
-  position: relative;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.card-layer-back-1 {
-  transform: scale(0.94) translateY(14px) rotate(2.5deg);
-  opacity: 0.55;
-  filter: blur(0.5px);
-}
-
-.card-layer-back-2 {
-  transform: scale(0.88) translateY(26px) rotate(-2deg);
-  opacity: 0.3;
-  filter: blur(1px);
-}
-
-/* Story indicator animation */
-@keyframes storyProgress {
-  0% { width: 0%; }
-  100% { width: 100%; }
-}
-
-.story-progress-active {
-  animation: storyProgress 5s linear infinite;
 }

@@ -11,14 +11,17 @@ Web app **mobile-first** de **conciergerie privée & accompagnement social** pou
 
 ## Charte graphique
 
-| Rôle        | Token Tailwind    | Hex       |
-| ----------- | ----------------- | --------- |
-| Fond profond | `up-black`        | `#0B0B0C` |
-| Surface     | `up-surface`      | `#121214` |
-| Or prestige | `up-gold`         | `#D4AF37` |
-| Or clair    | `up-gold-soft`    | `#F3E5AB` |
-| Texte       | `up-white`        | `#FFFFFF` |
-| Texte doux  | `up-gray`         | `#A1A1AA` |
+| Rôle                  | Token Tailwind / Var | Hex       |
+| --------------------- | -------------------- | --------- |
+| Violet UP officiel    | `up-500` / Primary   | `#8807A8` |
+| Violet hover          | `up-600`             | `#780395` |
+| Violet sombre         | `up-700`             | `#58026D` |
+| Violet clair          | `up-400`             | `#C616F2` |
+| Fond doux / badges    | `up-50`              | `#FAF2FB` |
+| Fond général          | `--up-bg-page`       | `#FAF9FB` |
+| Cartes                | `--up-card-bg`       | `#FFFFFF` |
+| Texte principal       | `--up-text-main`     | `#1D0F24` |
+| Texte secondaire      | `--up-text-muted`    | `#6B5D73` |
 
 ## Arborescence
 
