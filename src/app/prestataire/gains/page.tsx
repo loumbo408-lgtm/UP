@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowUpRight, CheckCircle2, RefreshCw, Wallet, X, Sparkles } from "lucide-react";
 import { useUpStore } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
+import { createClient } from "@/lib/supabase/client";
 
 export default function GainsPage() {
   const hydrated = useHydrated();
@@ -14,10 +15,33 @@ export default function GainsPage() {
   const [operator, setOperator] = useState<"airtel_money" | "moov_money">(
     "airtel_money",
   );
-  const [phone, setPhone] = useState("074123456");
-  const [amount, setAmount] = useState("50000");
+  const [phone, setPhone] = useState("");
+  const [amount, setAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [withdrawSuccess, setWithdrawSuccess] = useState<string | null>(null);
+
+  // Charger le numéro réel du prestataire depuis Supabase
+  useEffect(() => {
+    async function loadPhone() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("phone")
+            .eq("id", user.id)
+            .maybeSingle();
+          if (profile?.phone) {
+            setPhone(profile.phone.replace(/^\+241/, ""));
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+    loadPhone();
+  }, []);
 
   const handleWithdraw = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +77,7 @@ export default function GainsPage() {
           Solde disponible
         </span>
         <p className="mt-2 font-display text-4xl font-bold text-[#1D0F24]">
-          {hydrated ? balance.toLocaleString("fr-FR") : "96 000"}{" "}
+          {hydrated ? balance.toLocaleString("fr-FR") : "0"}{" "}
           <span className="text-base font-normal text-[#6B5D73]">FCFA</span>
         </p>
 
@@ -77,24 +101,33 @@ export default function GainsPage() {
         </h2>
 
         <div className="mt-3 space-y-2.5">
-          {gains.map((l) => (
-            <div
-              key={l.id}
-              className="flex items-center justify-between rounded-2xl border border-[#F0E6F3] bg-white p-4 shadow-xs"
-            >
-              <div>
-                <p className="text-xs font-bold text-[#1D0F24]">{l.label}</p>
-                <p className="text-[11px] text-[#6B5D73]">{l.date}</p>
-              </div>
-              <span
-                className={`font-mono text-xs font-bold ${
-                  l.montant.startsWith("+") ? "text-emerald-600" : "text-[#6B5D73]"
-                }`}
-              >
-                {l.montant} FCFA
-              </span>
+          {gains.length === 0 ? (
+            <div className="rounded-2xl border border-[#F0E6F3] bg-white p-6 text-center shadow-xs">
+              <p className="text-xs font-semibold text-[#1D0F24]">Aucune transaction pour le moment</p>
+              <p className="text-[11px] text-[#6B5D73] mt-1">
+                Vos honoraires apparaîtront ici après chaque mission accomplie et validée par code OTP.
+              </p>
             </div>
-          ))}
+          ) : (
+            gains.map((l) => (
+              <div
+                key={l.id}
+                className="flex items-center justify-between rounded-2xl border border-[#F0E6F3] bg-white p-4 shadow-xs"
+              >
+                <div>
+                  <p className="text-xs font-bold text-[#1D0F24]">{l.label}</p>
+                  <p className="text-[11px] text-[#6B5D73]">{l.date}</p>
+                </div>
+                <span
+                  className={`font-mono text-xs font-bold ${
+                    l.montant.startsWith("+") ? "text-emerald-600" : "text-[#6B5D73]"
+                  }`}
+                >
+                  {l.montant} FCFA
+                </span>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

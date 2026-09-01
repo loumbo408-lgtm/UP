@@ -143,6 +143,15 @@ function AdminUnauthorizedContent() {
               >
                 ⚡ Accès Direct Démonstration (Équipe UP)
               </button>
+
+              <div className="pt-2 text-center">
+                <Link
+                  href="/admin"
+                  className="text-xs font-semibold text-up-600 hover:text-up-700 underline underline-offset-2"
+                >
+                  Connexion officielle par e-mail (obamstephel20@gmail.com) →
+                </Link>
+              </div>
             </form>
           )}
         </div>

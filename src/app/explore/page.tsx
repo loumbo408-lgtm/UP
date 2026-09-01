@@ -21,6 +21,7 @@ import {
   Utensils,
   X,
   ArrowRight,
+  User,
 } from "lucide-react";
 import {
   SERVICE_CATEGORIES,
@@ -54,22 +55,34 @@ export default function ExplorePage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [likedIds, setLikedIds] = useState<Record<string, boolean>>({});
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
+  const [userInitial, setUserInitial] = useState<string>("U");
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
 
-  // Fetch current user avatar
+  // Fetch current authenticated user's real avatar
   useEffect(() => {
     async function loadUser() {
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          setIsUserLoggedIn(true);
           const { data: profile } = await supabase
             .from("profiles")
-            .select("avatar_url")
+            .select("avatar_url, full_name")
             .eq("id", user.id)
             .maybeSingle();
+
           if (profile?.avatar_url) {
             setUserAvatar(profile.avatar_url);
           }
+          if (profile?.full_name) {
+            setUserInitial(profile.full_name.trim().charAt(0).toUpperCase());
+          } else if (user.email) {
+            setUserInitial(user.email.trim().charAt(0).toUpperCase());
+          }
+        } else {
+          setIsUserLoggedIn(false);
+          setUserAvatar(null);
         }
       } catch {
         // ignore
@@ -139,19 +152,24 @@ export default function ExplorePage() {
         <div className="flex items-center justify-between px-1 py-3 border-b border-[#F0E6F3]">
           <div className="flex items-center gap-3">
             <Link
-              href="/client/profil"
-              className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[#F0E6F3] transition hover:scale-105 shadow-xs bg-white"
-              title="Mon profil"
+              href={isUserLoggedIn ? "/client/profil" : "/auth/login"}
+              className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-up-200 bg-up-50 text-up-700 transition hover:scale-105 shadow-xs"
+              title={isUserLoggedIn ? "Mon profil" : "Se connecter"}
             >
-              <Image
-                src={
-                  userAvatar ||
-                  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop"
-                }
-                alt="Mon avatar"
-                fill
-                className="object-cover"
-              />
+              {userAvatar ? (
+                <Image
+                  src={userAvatar}
+                  alt="Mon avatar"
+                  fill
+                  className="object-cover"
+                />
+              ) : isUserLoggedIn ? (
+                <span className="font-display text-sm font-bold text-up-700">
+                  {userInitial}
+                </span>
+              ) : (
+                <User size={18} className="text-up-600" />
+              )}
             </Link>
             <div>
               <h1 className="font-display text-2xl font-bold tracking-tight text-[#1D0F24] sm:text-3xl">

@@ -70,17 +70,21 @@ function SignupForm() {
       }
 
       if (data?.user) {
+        const userEmail = (data.user.email || email).toLowerCase().trim();
+        const isAdminEmail = userEmail === "obamstephel20@gmail.com";
+        const effectiveUserRole = isAdminEmail ? "admin" : selectedRole;
+
         // Create initial profile in profiles table
         await supabase.from("profiles").upsert({
           id: data.user.id,
-          role: selectedRole,
+          role: effectiveUserRole,
           full_name: fullName.trim(),
           phone: formattedPhone,
-          kyc_status: "pending",
+          kyc_status: isAdminEmail ? "verified" : "pending",
         });
 
         // If companion, create initial companion_details
-        if (selectedRole === "companion") {
+        if (selectedRole === "companion" && !isAdminEmail) {
           await supabase.from("companion_details").upsert({
             companion_id: data.user.id,
             bio: "Nouveau prestataire en attente de vérification KYC.",
@@ -91,17 +95,27 @@ function SignupForm() {
           });
         }
 
-        setRole(selectedRole === "companion" ? "prestataire" : "client");
-        document.cookie = `up_role=${selectedRole}; path=/; max-age=86400; SameSite=Lax`;
+        if (isAdminEmail) {
+          setRole("admin");
+          document.cookie = "up_role=admin; path=/; max-age=86400; SameSite=Lax";
+          document.cookie = "up_admin_session=true; path=/; max-age=86400; SameSite=Lax";
+          setSuccessMessage("Compte Administrateur UP créé avec succès !");
+          setTimeout(() => {
+            router.push("/dashboard/admin");
+          }, 1200);
+        } else {
+          setRole(selectedRole === "companion" ? "prestataire" : "client");
+          document.cookie = `up_role=${selectedRole}; path=/; max-age=86400; SameSite=Lax`;
 
-        setSuccessMessage("Compte créé avec succès ! Redirection en cours...");
-        setTimeout(() => {
-          if (selectedRole === "companion") {
-            router.push("/dashboard/companion");
-          } else {
-            router.push("/explore");
-          }
-        }, 1200);
+          setSuccessMessage("Compte créé avec succès ! Redirection en cours...");
+          setTimeout(() => {
+            if (selectedRole === "companion") {
+              router.push("/dashboard/companion");
+            } else {
+              router.push("/explore");
+            }
+          }, 1200);
+        }
       }
     } catch (err: any) {
       setErrorMessage(

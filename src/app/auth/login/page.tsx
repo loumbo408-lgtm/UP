@@ -51,6 +51,9 @@ function LoginForm() {
       }
 
       if (data?.user) {
+        const userEmail = (data.user.email || "").toLowerCase().trim();
+        const isAdminEmail = userEmail === "obamstephel20@gmail.com";
+
         // Fetch role from profile
         const { data: profile } = await supabase
           .from("profiles")
@@ -58,12 +61,19 @@ function LoginForm() {
           .eq("id", data.user.id)
           .maybeSingle();
 
-        const userRole = profile?.role || "client";
+        const userRole = isAdminEmail ? "admin" : (profile?.role || "client");
         setRole(userRole === "companion" ? "prestataire" : (userRole as any));
         document.cookie = `up_role=${userRole}; path=/; max-age=86400; SameSite=Lax`;
 
-        if (userRole === "admin") {
+        if (userRole === "admin" || isAdminEmail) {
           document.cookie = "up_admin_session=true; path=/; max-age=86400; SameSite=Lax";
+          try {
+            if (profile?.role !== "admin") {
+              await supabase.from("profiles").update({ role: "admin" }).eq("id", data.user.id);
+            }
+          } catch {
+            // ignore
+          }
           router.push("/dashboard/admin");
         } else if (userRole === "companion") {
           router.push("/dashboard/companion");

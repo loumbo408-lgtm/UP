@@ -32,6 +32,26 @@ export default function ClientDashboardPage() {
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
+      try {
+        const { createClient } = await import("@/lib/supabase/client");
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .maybeSingle();
+
+          if (profile?.role === "companion") {
+            window.location.href = "/dashboard/companion";
+            return;
+          }
+        }
+      } catch {
+        // ignore
+      }
+
       const data = await fetchVerifiedCompanions();
       setCompanions(data);
       setIsLoading(false);

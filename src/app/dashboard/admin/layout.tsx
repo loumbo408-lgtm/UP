@@ -32,13 +32,19 @@ export default function AdminLayout({
   const activeEscrowHeldCount = adminEscrows.filter((e) => e.status === "held").length;
   const disputedCount = adminEscrows.filter((e) => e.status === "disputed").length;
 
-  useEffect(() => {
-    if (typeof document !== "undefined" && role !== "admin") {
-      document.cookie = "up_role=admin; path=/; max-age=86400; SameSite=Lax";
-      document.cookie = "up_admin_session=true; path=/; max-age=86400; SameSite=Lax";
-      setRole("admin");
-    }
-  }, [role, setRole]);
+  // Les pages d'authentification et d'accès refusé n'affichent pas la console admin
+  if (
+    pathname === "/dashboard/admin/login" ||
+    pathname === "/dashboard/admin/unauthorized"
+  ) {
+    return <>{children}</>;
+  }
+
+  const handleAdminLogout = () => {
+    document.cookie = "up_admin_session=; path=/; max-age=0";
+    document.cookie = "up_role=; path=/; max-age=0";
+    window.location.href = "/dashboard/admin/login";
+  };
 
   const navTabs = [
     {
@@ -80,7 +86,7 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen bg-[#FAF9FB] text-[#1D0F24]">
-      {/* Header Admin avec badge de sécurité et sélecteur de rôle */}
+      {/* Header Admin avec badge de sécurité et bouton déconnexion */}
       <header className="sticky top-0 z-40 border-b border-[#F0E6F3] bg-white/95 px-4 sm:px-6 py-3.5 backdrop-blur-md">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -92,33 +98,24 @@ export default function AdminLayout({
             </Link>
           </div>
 
-          {/* Passerelle statut & Menu de rôle */}
+          {/* Statut réseau & Identité Admin */}
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[10px] font-semibold text-emerald-700">
               <Radio size={11} className="animate-pulse text-emerald-600" />
-              <span>Passerelles Airtel &amp; Moov 100% Actives</span>
+              <span>Passerelles Airtel &amp; Moov Actives</span>
             </div>
 
-            <div className="flex items-center rounded-full border border-[#F0E6F3] bg-[#FAF9FB] p-1 shadow-xs">
-              <Link
-                href="/client"
-                onClick={() => setRole("client")}
-                className="rounded-full px-3 py-1 text-[11px] font-medium text-[#6B5D73] hover:text-[#1D0F24] transition"
-                title="Basculer vers Client"
-              >
-                Client
-              </Link>
-              <Link
-                href="/dashboard/companion"
-                onClick={() => setRole("prestataire")}
-                className="rounded-full px-3 py-1 text-[11px] font-medium text-[#6B5D73] hover:text-[#1D0F24] transition"
-                title="Basculer vers Prestataire"
-              >
-                Prestataire
-              </Link>
-              <span className="rounded-full bg-up-500 px-3 py-1 text-[11px] font-bold text-white shadow-xs">
-                Admin
+            <div className="flex items-center gap-2">
+              <span className="hidden md:inline-block rounded-full bg-up-50 border border-up-200 px-3 py-1 text-[11px] font-bold text-up-700">
+                obamstephel20@gmail.com
               </span>
+              <button
+                type="button"
+                onClick={handleAdminLogout}
+                className="rounded-full border border-red-200 bg-red-50 hover:bg-red-100 px-3.5 py-1 text-[11px] font-bold text-red-700 transition"
+              >
+                Déconnexion
+              </button>
             </div>
           </div>
         </div>

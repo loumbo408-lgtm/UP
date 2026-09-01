@@ -2,16 +2,27 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, User, Sparkles, LogIn } from "lucide-react";
 import { UpLogo } from "@/components/brand/UpLogo";
 import { UserDrawer } from "@/components/navigation/UserDrawer";
 import { createClient } from "@/lib/supabase/client";
 
 export function Header() {
+  const router = useRouter();
   const pathname = usePathname();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [logoClicks, setLogoClicks] = useState(0);
+
+  const handleLogoSecretTap = () => {
+    const next = logoClicks + 1;
+    setLogoClicks(next);
+    if (next >= 3) {
+      router.push("/dashboard/admin/login");
+      setLogoClicks(0);
+    }
+  };
 
   useEffect(() => {
     async function checkAuth() {
@@ -39,8 +50,14 @@ export function Header() {
     <>
       <header className="sticky top-0 z-40 w-full border-b border-[#F0E6F3] bg-white/95 backdrop-blur-md transition-all shadow-[0_2px_15px_rgba(136,7,168,0.03)]">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Logo Brand UP Violet Royal */}
-          <UpLogo size={36} variant="violet" showText={true} />
+          {/* Logo Brand UP Violet Royal avec Secret Tap Super-Admin */}
+          <div
+            onClick={handleLogoSecretTap}
+            className="cursor-pointer select-none transition active:scale-95"
+            title="UP Conciergerie Privée"
+          >
+            <UpLogo size={36} variant="violet" showText={true} />
+          </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-[#6B5D73]">

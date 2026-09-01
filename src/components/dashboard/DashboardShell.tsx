@@ -544,60 +544,6 @@ export function DashboardShell({
                       <Settings size={14} className="text-up-500" />
                       <span>Mon Profil &amp; Compte</span>
                     </Link>
-
-                    {/* Bascule de Rôles */}
-                    <div className="mt-1 border-t border-[#F0E6F3] pt-1.5 px-3">
-                      <span className="text-[10px] uppercase font-bold text-[#6B5D73]">
-                        Changer d&apos;espace :
-                      </span>
-                      <div className="mt-1 grid grid-cols-3 gap-1">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setRole("client");
-                            setIsUserDropdownOpen(false);
-                            router.push("/client");
-                          }}
-                          className={`rounded-lg py-1 text-[10px] font-bold ${
-                            currentRole === "client"
-                              ? "bg-up-500 text-white"
-                              : "bg-gray-50 text-[#6B5D73]"
-                          }`}
-                        >
-                          Client
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setRole("prestataire");
-                            setIsUserDropdownOpen(false);
-                            router.push("/dashboard/companion");
-                          }}
-                          className={`rounded-lg py-1 text-[10px] font-bold ${
-                            currentRole === "prestataire"
-                              ? "bg-up-500 text-white"
-                              : "bg-gray-50 text-[#6B5D73]"
-                          }`}
-                        >
-                          Pro
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setRole("admin");
-                            setIsUserDropdownOpen(false);
-                            router.push("/dashboard/admin");
-                          }}
-                          className={`rounded-lg py-1 text-[10px] font-bold ${
-                            currentRole === "admin"
-                              ? "bg-up-500 text-white"
-                              : "bg-gray-50 text-[#6B5D73]"
-                          }`}
-                        >
-                          Admin
-                        </button>
-                      </div>
-                    </div>
                   </div>
 
                   <div className="border-t border-[#F0E6F3] pt-1">

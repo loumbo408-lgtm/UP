@@ -32,6 +32,7 @@ export function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
 
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userFullName, setUserFullName] = useState<string | null>(null);
+  const [logoClicks, setLogoClicks] = useState<number>(0);
 
   useEffect(() => {
     async function getUser() {
@@ -69,19 +70,6 @@ export function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
     }
   }, [isOpen]);
 
-  const handleSwitchRole = (newRole: Role) => {
-    setRole(newRole);
-    document.cookie = `up_role=${newRole}; path=/; max-age=86400; SameSite=Lax`;
-    onClose();
-    if (newRole === "prestataire") {
-      router.push("/dashboard/companion");
-    } else if (newRole === "admin") {
-      router.push("/dashboard/admin");
-    } else {
-      router.push("/client");
-    }
-  };
-
   const handleSignOut = async () => {
     try {
       const supabase = createClient();
@@ -95,7 +83,21 @@ export function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
     onClose();
   };
 
+  const handleSecretLogoClick = () => {
+    const next = logoClicks + 1;
+    setLogoClicks(next);
+    if (next >= 3) {
+      onClose();
+      router.push("/admin");
+      setLogoClicks(0);
+    }
+  };
+
   if (!isOpen) return null;
+
+  const isAdminUser =
+    userEmail?.toLowerCase() === "obamstephel20@gmail.com" ||
+    currentRole === "admin";
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -108,9 +110,15 @@ export function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
       {/* Drawer Panel */}
       <aside className="relative z-10 flex h-full w-full max-w-sm flex-col justify-between border-l border-[#F0E6F3] bg-white p-6 shadow-2xl animate-in slide-in-from-right duration-300">
         <div>
-          {/* Header */}
+          {/* Header avec Secret Tap sur le Logo */}
           <div className="flex items-center justify-between border-b border-[#F0E6F3] pb-5">
-            <UpLogo size={32} variant="violet" showText={true} />
+            <div
+              onClick={handleSecretLogoClick}
+              className="cursor-pointer select-none transition active:scale-95"
+              title="UP Gabon"
+            >
+              <UpLogo size={32} variant="violet" showText={true} />
+            </div>
             <button
               type="button"
               onClick={onClose}
@@ -143,155 +151,219 @@ export function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
             <div className="mt-3 flex items-center justify-between border-t border-up-200/60 pt-2.5 text-xs">
               <span className="text-[#6B5D73]">Espace actif :</span>
               <span className="rounded-full bg-up-100 px-2.5 py-0.5 text-[11px] font-bold text-up-700 uppercase">
-                {currentRole}
+                {isAdminUser ? "Super-Admin" : currentRole}
               </span>
             </div>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="mt-6 space-y-1.5 text-sm">
-            <Link
-              href="/client"
-              onClick={onClose}
-              className={`flex items-center justify-between rounded-xl px-3.5 py-3 transition ${
-                pathname === "/client"
-                  ? "bg-up-50 text-up-700 font-bold border-l-4 border-up-500"
-                  : "text-[#6B5D73] hover:bg-up-50/60 hover:text-up-700"
-              }`}
-            >
-              <span className="flex items-center gap-3">
-                <Compass size={18} className="text-up-500" />
-                <span>Tableau de bord</span>
-              </span>
-              <ChevronRight size={16} />
-            </Link>
+          {/* Navigation Links — Strictement Cloisonnés par Rôle */}
+          <nav className="mt-6 space-y-1 text-sm">
+            {/* Si Administrateur Officiel */}
+            {isAdminUser && (
+              <Link
+                href="/dashboard/admin"
+                onClick={onClose}
+                className={`flex items-center justify-between rounded-xl px-3.5 py-3 transition ${
+                  pathname.startsWith("/dashboard/admin")
+                    ? "bg-up-500 text-white font-bold shadow-md shadow-up-500/20"
+                    : "bg-up-50 text-up-700 font-bold border border-up-200 hover:bg-up-100"
+                }`}
+              >
+                <span className="flex items-center gap-3">
+                  <ShieldCheck size={18} />
+                  <span>Console Super-Admin</span>
+                </span>
+                <ChevronRight size={16} />
+              </Link>
+            )}
 
-            <Link
-              href="/explore"
-              onClick={onClose}
-              className={`flex items-center justify-between rounded-xl px-3.5 py-3 transition ${
-                pathname === "/explore"
-                  ? "bg-up-50 text-up-700 font-bold border-l-4 border-up-500"
-                  : "text-[#6B5D73] hover:bg-up-50/60 hover:text-up-700"
-              }`}
-            >
-              <span className="flex items-center gap-3">
-                <Compass size={18} className="text-up-500" />
-                <span>Explorer les profils</span>
-              </span>
-              <ChevronRight size={16} />
-            </Link>
+            {/* Navigation Prestataire Exclusif */}
+            {currentRole === "prestataire" && !isAdminUser && (
+              <>
+                <Link
+                  href="/dashboard/companion"
+                  onClick={onClose}
+                  className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 transition ${
+                    pathname === "/dashboard/companion"
+                      ? "bg-up-50 text-up-700 font-bold border-l-4 border-up-500"
+                      : "text-[#6B5D73] hover:bg-up-50/60 hover:text-up-700"
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <Sparkles size={18} className="text-up-500" />
+                    <span>Demandes Radar</span>
+                  </span>
+                  <ChevronRight size={16} />
+                </Link>
 
-            <Link
-              href="/client/reservations"
-              onClick={onClose}
-              className={`flex items-center justify-between rounded-xl px-3.5 py-3 transition ${
-                pathname === "/client/reservations"
-                  ? "bg-up-50 text-up-700 font-bold border-l-4 border-up-500"
-                  : "text-[#6B5D73] hover:bg-up-50/60 hover:text-up-700"
-              }`}
-            >
-              <span className="flex items-center gap-3">
-                <Briefcase size={18} className="text-up-500" />
-                <span>Mes Réservations</span>
-              </span>
-              <ChevronRight size={16} />
-            </Link>
+                <Link
+                  href="/prestataire/disponibilite"
+                  onClick={onClose}
+                  className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 transition ${
+                    pathname.startsWith("/prestataire/disponibilite")
+                      ? "bg-up-50 text-up-700 font-bold border-l-4 border-up-500"
+                      : "text-[#6B5D73] hover:bg-up-50/60 hover:text-up-700"
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <Briefcase size={18} className="text-up-500" />
+                    <span>Missions &amp; Agenda</span>
+                  </span>
+                  <ChevronRight size={16} />
+                </Link>
 
-            <Link
-              href="/client/messages"
-              onClick={onClose}
-              className={`flex items-center justify-between rounded-xl px-3.5 py-3 transition ${
-                pathname === "/client/messages"
-                  ? "bg-up-50 text-up-700 font-bold border-l-4 border-up-500"
-                  : "text-[#6B5D73] hover:bg-up-50/60 hover:text-up-700"
-              }`}
-            >
-              <span className="flex items-center gap-3">
-                <MessageSquare size={18} className="text-up-500" />
-                <span>Messages &amp; Échanges</span>
-              </span>
-              <ChevronRight size={16} />
-            </Link>
+                <Link
+                  href="/prestataire/gains"
+                  onClick={onClose}
+                  className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 transition ${
+                    pathname.startsWith("/prestataire/gains")
+                      ? "bg-up-50 text-up-700 font-bold border-l-4 border-up-500"
+                      : "text-[#6B5D73] hover:bg-up-50/60 hover:text-up-700"
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <Sparkles size={18} className="text-up-500" />
+                    <span>Mes Revenus</span>
+                  </span>
+                  <ChevronRight size={16} />
+                </Link>
 
-            <Link
-              href="/dashboard/companion"
-              onClick={onClose}
-              className={`flex items-center justify-between rounded-xl px-3.5 py-3 transition ${
-                pathname === "/dashboard/companion"
-                  ? "bg-up-50 text-up-700 font-bold border-l-4 border-up-500"
-                  : "text-[#6B5D73] hover:bg-up-50/60 hover:text-up-700"
-              }`}
-            >
-              <span className="flex items-center gap-3">
-                <Sparkles size={18} className="text-up-500" />
-                <span>Espace Prestataire</span>
-              </span>
-              <ChevronRight size={16} />
-            </Link>
+                <Link
+                  href="/prestataire/profil"
+                  onClick={onClose}
+                  className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 transition ${
+                    pathname.startsWith("/prestataire/profil")
+                      ? "bg-up-50 text-up-700 font-bold border-l-4 border-up-500"
+                      : "text-[#6B5D73] hover:bg-up-50/60 hover:text-up-700"
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <User size={18} className="text-up-500" />
+                    <span>Mon Profil Pro</span>
+                  </span>
+                  <ChevronRight size={16} />
+                </Link>
+              </>
+            )}
 
-            <Link
-              href="/dashboard/admin"
-              onClick={onClose}
-              className={`flex items-center justify-between rounded-xl px-3.5 py-3 transition ${
-                pathname.startsWith("/dashboard/admin")
-                  ? "bg-up-50 text-up-700 font-bold border-l-4 border-up-500"
-                  : "text-[#6B5D73] hover:bg-up-50/60 hover:text-up-700"
-              }`}
-            >
-              <span className="flex items-center gap-3">
-                <ShieldCheck size={18} className="text-emerald-600" />
-                <span>Supervision &amp; Modération UP</span>
-              </span>
-              <Lock size={14} className="text-[#6B5D73]" />
-            </Link>
+            {/* Navigation Client Exclusif */}
+            {currentRole !== "prestataire" && !isAdminUser && (
+              <>
+                <Link
+                  href="/client"
+                  onClick={onClose}
+                  className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 transition ${
+                    pathname === "/client"
+                      ? "bg-up-50 text-up-700 font-bold border-l-4 border-up-500"
+                      : "text-[#6B5D73] hover:bg-up-50/60 hover:text-up-700"
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <Compass size={18} className="text-up-500" />
+                    <span>Tableau de bord</span>
+                  </span>
+                  <ChevronRight size={16} />
+                </Link>
+
+                <Link
+                  href="/explore"
+                  onClick={onClose}
+                  className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 transition ${
+                    pathname === "/explore"
+                      ? "bg-up-50 text-up-700 font-bold border-l-4 border-up-500"
+                      : "text-[#6B5D73] hover:bg-up-50/60 hover:text-up-700"
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <Compass size={18} className="text-up-500" />
+                    <span>Explorer les profils</span>
+                  </span>
+                  <ChevronRight size={16} />
+                </Link>
+
+                <Link
+                  href="/client/reservations"
+                  onClick={onClose}
+                  className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 transition ${
+                    pathname === "/client/reservations"
+                      ? "bg-up-50 text-up-700 font-bold border-l-4 border-up-500"
+                      : "text-[#6B5D73] hover:bg-up-50/60 hover:text-up-700"
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <Briefcase size={18} className="text-up-500" />
+                    <span>Mes Réservations</span>
+                  </span>
+                  <ChevronRight size={16} />
+                </Link>
+
+                <Link
+                  href="/client/messages"
+                  onClick={onClose}
+                  className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 transition ${
+                    pathname === "/client/messages"
+                      ? "bg-up-50 text-up-700 font-bold border-l-4 border-up-500"
+                      : "text-[#6B5D73] hover:bg-up-50/60 hover:text-up-700"
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <MessageSquare size={18} className="text-up-500" />
+                    <span>Messages</span>
+                  </span>
+                  <ChevronRight size={16} />
+                </Link>
+
+                <Link
+                  href="/client/profil"
+                  onClick={onClose}
+                  className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 transition ${
+                    pathname === "/client/profil"
+                      ? "bg-up-50 text-up-700 font-bold border-l-4 border-up-500"
+                      : "text-[#6B5D73] hover:bg-up-50/60 hover:text-up-700"
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <User size={18} className="text-up-500" />
+                    <span>Mon Profil</span>
+                  </span>
+                  <ChevronRight size={16} />
+                </Link>
+              </>
+            )}
           </nav>
 
-          {/* Role Switcher */}
+          {/* Invitation inscription dédiée (Client <-> Prestataire) */}
           <div className="mt-6 border-t border-[#F0E6F3] pt-4">
-            <p className="px-1 text-[11px] font-semibold uppercase tracking-wider text-[#6B5D73]">
-              Changer d&apos;espace
-            </p>
-            <div className="mt-2 grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => handleSwitchRole("client")}
-                className={`rounded-xl border py-2 text-center text-xs font-semibold transition ${
-                  currentRole === "client"
-                    ? "border-up-500 bg-up-500 text-white shadow-sm"
-                    : "border-[#F0E6F3] bg-up-50/50 text-[#6B5D73] hover:text-up-700"
-                }`}
+            {currentRole === "client" ? (
+              <Link
+                href="/auth/signup?role=companion"
+                onClick={onClose}
+                className="flex items-center justify-between rounded-2xl border border-up-200 bg-up-50/60 p-3.5 text-xs font-semibold text-up-700 transition hover:bg-up-100/60"
               >
-                Client
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSwitchRole("prestataire")}
-                className={`rounded-xl border py-2 text-center text-xs font-semibold transition ${
-                  currentRole === "prestataire"
-                    ? "border-up-500 bg-up-500 text-white shadow-sm"
-                    : "border-[#F0E6F3] bg-up-50/50 text-[#6B5D73] hover:text-up-700"
-                }`}
+                <span className="flex items-center gap-2">
+                  <Sparkles size={16} className="text-up-500" />
+                  <span>Devenir prestataire certifié</span>
+                </span>
+                <ChevronRight size={14} className="text-up-400" />
+              </Link>
+            ) : currentRole === "prestataire" ? (
+              <Link
+                href="/auth/signup?role=client"
+                onClick={onClose}
+                className="flex items-center justify-between rounded-2xl border border-up-200 bg-up-50/60 p-3.5 text-xs font-semibold text-up-700 transition hover:bg-up-100/60"
               >
-                Prestataire
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSwitchRole("admin")}
-                className={`rounded-xl border py-2 text-center text-xs font-semibold transition ${
-                  currentRole === "admin"
-                    ? "border-up-500 bg-up-500 text-white shadow-sm"
-                    : "border-[#F0E6F3] bg-up-50/50 text-[#6B5D73] hover:text-up-700"
-                }`}
-              >
-                Admin
-              </button>
-            </div>
+                <span className="flex items-center gap-2">
+                  <Sparkles size={16} className="text-up-500" />
+                  <span>Créer un compte Client</span>
+                </span>
+                <ChevronRight size={14} className="text-up-400" />
+              </Link>
+            ) : null}
           </div>
         </div>
 
-        {/* Footer actions */}
-        <div className="border-t border-[#F0E6F3] pt-4">
+        {/* Footer actions avec Bouton Caché Admin */}
+        <div className="border-t border-[#F0E6F3] pt-4 space-y-3">
           <button
             type="button"
             onClick={handleSignOut}
@@ -300,6 +372,19 @@ export function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
             <LogOut size={16} />
             <span>Se déconnecter de UP</span>
           </button>
+
+          {/* Bouton caché / discret administration */}
+          <div className="text-center">
+            <Link
+              href="/admin"
+              onClick={onClose}
+              className="inline-flex items-center gap-1.5 text-[10px] text-[#6B5D73]/50 hover:text-up-700 transition p-1"
+              title="Supervision interne UP"
+            >
+              <Lock size={10} />
+              <span>Administration interne</span>
+            </Link>
+          </div>
         </div>
       </aside>
     </div>

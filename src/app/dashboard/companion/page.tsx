@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Wallet,
   X,
+  AlertCircle,
 } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { useUpStore, type RadarDemand } from "@/lib/store";
@@ -35,9 +36,10 @@ export default function CompanionDashboardPage() {
   const isOnline = hydrated && available;
 
   // Real Supabase profile state
-  const [profileName, setProfileName] = useState<string>("Prestataire UP");
-  const [profileZone, setProfileZone] = useState<string>("Libreville");
-  const [profileHourlyRate, setProfileHourlyRate] = useState<number>(25000);
+  const [profileName, setProfileName] = useState<string>("");
+  const [profileZone, setProfileZone] = useState<string>("");
+  const [profileHourlyRate, setProfileHourlyRate] = useState<number>(0);
+  const [profileKycStatus, setProfileKycStatus] = useState<string>("pending");
 
   useEffect(() => {
     async function loadCompanionData() {
@@ -56,9 +58,17 @@ export default function CompanionDashboardPage() {
             .maybeSingle();
 
           if (profile) {
+            if (profile.role === "client") {
+              window.location.href = "/client";
+              return;
+            }
             setProfileName(
-              profile.full_name || user.user_metadata?.full_name || "Prestataire UP",
+              profile.full_name || user.user_metadata?.full_name || "Prestataire",
             );
+            setProfileKycStatus(profile.kyc_status || "pending");
+            if (profile.phone) {
+              setWithdrawPhone(profile.phone.replace(/^\+241/, ""));
+            }
             const details = Array.isArray(profile.companion_details)
               ? profile.companion_details[0]
               : profile.companion_details;
@@ -80,8 +90,8 @@ export default function CompanionDashboardPage() {
   // Withdrawal modal state
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [operator, setOperator] = useState<"airtel_money" | "moov_money">("airtel_money");
-  const [withdrawPhone, setWithdrawPhone] = useState("074123456");
-  const [withdrawAmount, setWithdrawAmount] = useState("50000");
+  const [withdrawPhone, setWithdrawPhone] = useState("");
+  const [withdrawAmount, setWithdrawAmount] = useState("");
   const [isWithdrawProcessing, setIsWithdrawProcessing] = useState(false);
   const [withdrawSuccessMsg, setWithdrawSuccessMsg] = useState<string | null>(null);
 
@@ -89,6 +99,7 @@ export default function CompanionDashboardPage() {
   const [acceptedDemand, setAcceptedDemand] = useState<RadarDemand | null>(null);
 
   // OTP release modal for companion
+  const [missionIdInput, setMissionIdInput] = useState("");
   const [enteredOtp, setEnteredOtp] = useState("");
   const [otpProcessing, setOtpProcessing] = useState(false);
   const [otpSuccessMsg, setOtpSuccessMsg] = useState<string | null>(null);
@@ -129,7 +140,7 @@ export default function CompanionDashboardPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          missionId: "mission-live-test",
+          missionId: missionIdInput.trim(),
           otpCode: enteredOtp.trim(),
           clientConfirmed: true,
           companionConfirmed: true,
@@ -218,21 +229,37 @@ export default function CompanionDashboardPage() {
           <h3 className="font-display text-sm font-bold text-[#1D0F24]">
             Agrément Professionnel
           </h3>
-          <span className="flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-600 px-2.5 py-0.5 text-[10px] font-bold">
-            <BadgeCheck size={12} />
-            KYC Vérifié
-          </span>
+          {profileKycStatus === "verified" ? (
+            <span className="flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-600 px-2.5 py-0.5 text-[10px] font-bold">
+              <BadgeCheck size={12} />
+              KYC Vérifié
+            </span>
+          ) : profileKycStatus === "pending" ? (
+            <span className="flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 px-2.5 py-0.5 text-[10px] font-bold">
+              <Clock size={12} />
+              KYC En cours d&apos;examen
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 rounded-full bg-red-50 text-red-600 px-2.5 py-0.5 text-[10px] font-bold">
+              <AlertCircle size={12} />
+              KYC Non validé
+            </span>
+          )}
         </div>
 
         <div className="mt-4 space-y-2 text-xs">
           <div className="flex items-center justify-between rounded-xl bg-[#FAF9FB] p-2.5 border border-[#F0E6F3]">
             <span className="text-[#6B5D73]">Zone d&apos;activité</span>
-            <span className="font-bold text-[#1D0F24]">{profileZone}</span>
+            <span className="font-bold text-[#1D0F24]">
+              {profileZone || "Non renseignée"}
+            </span>
           </div>
           <div className="flex items-center justify-between rounded-xl bg-[#FAF9FB] p-2.5 border border-[#F0E6F3]">
             <span className="text-[#6B5D73]">Tarif horaire de base</span>
             <span className="font-bold text-up-700">
-              {profileHourlyRate.toLocaleString("fr-FR")} FCFA/h
+              {profileHourlyRate > 0
+                ? `${profileHourlyRate.toLocaleString("fr-FR")} FCFA/h`
+                : "Non renseigné"}
             </span>
           </div>
         </div>
@@ -328,18 +355,24 @@ export default function CompanionDashboardPage() {
             </div>
 
             <div className="mt-3 space-y-2">
-              {gains.slice(0, 2).map((gain) => (
-                <div
-                  key={gain.id}
-                  className="flex items-center justify-between rounded-xl bg-[#FAF9FB] p-2.5 text-xs border border-[#F0E6F3]"
-                >
-                  <div>
-                    <p className="font-bold text-[#1D0F24]">{gain.label}</p>
-                    <p className="text-[10px] text-[#6B5D73]">{gain.date}</p>
-                  </div>
-                  <span className="font-bold text-emerald-600">{gain.montant}</span>
+              {gains.length === 0 ? (
+                <div className="rounded-xl bg-[#FAF9FB] p-3 text-center border border-[#F0E6F3]">
+                  <p className="text-xs text-[#6B5D73]">Aucune mission validée pour le moment.</p>
                 </div>
-              ))}
+              ) : (
+                gains.slice(0, 2).map((gain) => (
+                  <div
+                    key={gain.id}
+                    className="flex items-center justify-between rounded-xl bg-[#FAF9FB] p-2.5 text-xs border border-[#F0E6F3]"
+                  >
+                    <div>
+                      <p className="font-bold text-[#1D0F24]">{gain.label}</p>
+                      <p className="text-[10px] text-[#6B5D73]">{gain.date}</p>
+                    </div>
+                    <span className="font-bold text-emerald-600">{gain.montant}</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -475,6 +508,20 @@ export default function CompanionDashboardPage() {
 
           <div>
             <label className="block text-xs font-bold text-[#1D0F24] mb-1.5">
+              Identifiant / Référence de la mission
+            </label>
+            <input
+              type="text"
+              value={missionIdInput}
+              onChange={(e) => setMissionIdInput(e.target.value)}
+              placeholder="ex: miss-2026-001"
+              required
+              className="w-full rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] p-3 text-xs font-medium text-[#1D0F24] focus:border-up-500 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-[#1D0F24] mb-1.5">
               Code OTP de libération (fourni par le client)
             </label>
             <input
@@ -490,7 +537,7 @@ export default function CompanionDashboardPage() {
 
           <button
             type="submit"
-            disabled={otpProcessing || enteredOtp.length < 6}
+            disabled={otpProcessing || enteredOtp.length < 6 || !missionIdInput.trim()}
             className="w-full rounded-full bg-up-500 hover:bg-up-600 py-3.5 text-xs font-bold text-white shadow-md shadow-up-500/20 active:scale-[0.98] transition disabled:opacity-50"
           >
             {otpProcessing ? "Validation en cours..." : "Valider la fin de mission & Débloquer les fonds"}
@@ -574,6 +621,7 @@ export default function CompanionDashboardPage() {
                     type="tel"
                     value={withdrawPhone}
                     onChange={(e) => setWithdrawPhone(e.target.value)}
+                    placeholder="ex: 074123456"
                     required
                     className="w-full rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] p-3 text-xs text-[#1D0F24] font-bold focus:border-up-500 focus:outline-none"
                   />
@@ -587,6 +635,7 @@ export default function CompanionDashboardPage() {
                     type="number"
                     value={withdrawAmount}
                     onChange={(e) => setWithdrawAmount(e.target.value)}
+                    placeholder="ex: 25000"
                     max={balance}
                     min={1000}
                     required

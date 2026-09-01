@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   BadgeCheck,
@@ -13,7 +14,7 @@ import {
   LogOut,
   MapPin,
   Phone,
-  Repeat,
+  ArrowRight,
   Save,
   ShieldCheck,
   Sparkles,
@@ -28,6 +29,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { createClient } from "@/lib/supabase/client";
 import { useUpStore, type Role } from "@/lib/store";
 import { SERVICE_CATEGORIES, ZONES, type Zone, type ServiceCategory } from "@/lib/data";
+import { compressImageFile } from "@/lib/image-upload";
 
 const AVAILABLE_LANGUAGES = [
   "Français",
@@ -136,29 +138,39 @@ export default function PrestataireProfilPage() {
   }, []);
 
   // Handle Photo Select
-  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > 10 * 1024 * 1024) {
       setStatusMessage({
         type: "error",
-        text: "L'image sélectionnée dépasse la limite autorisée de 5 Mo.",
+        text: "L'image sélectionnée dépasse la limite autorisée de 10 Mo.",
       });
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (typeof event.target?.result === "string") {
-        setAvatarUrl(event.target.result);
-        setStatusMessage({
-          type: "success",
-          text: "Nouvelle photo prête. Cliquez sur 'Enregistrer mon profil' pour valider.",
-        });
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      setStatusMessage({
+        type: "success",
+        text: "Optimisation de l'image en cours...",
+      });
+      const compressed = await compressImageFile(file, {
+        maxWidth: 400,
+        maxHeight: 400,
+        quality: 0.85,
+      });
+      setAvatarUrl(compressed);
+      setStatusMessage({
+        type: "success",
+        text: "Photo prête et optimisée. Cliquez sur 'Enregistrer mon profil' pour valider.",
+      });
+    } catch (err: any) {
+      setStatusMessage({
+        type: "error",
+        text: err?.message || "Erreur lors du traitement de la photo.",
+      });
+    }
   };
 
   const toggleService = (srvId: string) => {
@@ -197,19 +209,23 @@ export default function PrestataireProfilPage() {
 
     try {
       const supabase = createClient();
-      const formattedPhone = phone.trim().startsWith("+")
-        ? phone.trim()
-        : `+241${phone.trim().replace(/^0/, "")}`;
+      const rawPhone = phone.trim();
+      let formattedPhone: string | null = null;
+      if (rawPhone.length > 0) {
+        formattedPhone = rawPhone.startsWith("+")
+          ? rawPhone
+          : `+241${rawPhone.replace(/^0/, "")}`;
+      }
 
-      // 1. Update profiles table
+      // 1. Update profiles table via .update() to respect role isolation & triggers
       const { error: profileError } = await supabase
         .from("profiles")
-        .upsert({
-          id: userId,
+        .update({
           full_name: fullName.trim(),
           phone: formattedPhone,
-          avatar_url: avatarUrl,
-        });
+          avatar_url: avatarUrl || null,
+        })
+        .eq("id", userId);
 
       if (profileError) throw profileError;
 
@@ -241,16 +257,6 @@ export default function PrestataireProfilPage() {
       });
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const handleSwitchRole = (newRole: Role) => {
-    setRole(newRole);
-    document.cookie = `up_role=${newRole}; path=/; max-age=86400; SameSite=Lax`;
-    if (newRole === "client") {
-      router.push("/explore");
-    } else if (newRole === "admin") {
-      router.push("/dashboard/admin");
     }
   };
 
@@ -616,28 +622,32 @@ export default function PrestataireProfilPage() {
           </button>
         </form>
 
-        {/* Changer d'espace / Rôle */}
-        <div className="mt-8 rounded-3xl border border-[#F0E6F3] bg-white p-6 space-y-3 shadow-xs">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#6B5D73]">
-            Espaces &amp; Navigation
+        {/* Créer un compte Client dédié */}
+        <div className="mt-8 rounded-3xl border border-up-200 bg-up-50/60 p-6 space-y-3 shadow-xs">
+          <div className="flex items-center gap-2 text-up-700">
+            <Sparkles size={18} className="text-up-500" />
+            <h3 className="font-display text-sm font-bold text-[#1D0F24]">
+              Vous souhaitez réserver des prestations ?
+            </h3>
+          </div>
+          <p className="text-xs text-[#6B5D73] leading-relaxed">
+            Pour réserver des accompagnements et services de conciergerie privée, veuillez vous inscrire avec un compte client dédié.
           </p>
-
-          <button
-            type="button"
-            onClick={() => handleSwitchRole("client")}
-            className="flex w-full items-center justify-between rounded-2xl border border-[#F0E6F3] bg-[#FAF9FB] p-3.5 text-xs font-semibold text-[#1D0F24] transition hover:border-up-300"
+          <Link
+            href="/auth/signup?role=client"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-up-500 text-white hover:bg-up-600 py-3.5 text-xs font-bold transition shadow-xs"
           >
-            <span className="flex items-center gap-2.5">
-              <Sparkles size={16} className="text-up-500" />
-              <span>Accéder à l&apos;Espace Client</span>
-            </span>
-            <Repeat size={14} className="text-[#6B5D73]" />
-          </button>
+            <span>Créer un compte Client</span>
+            <ArrowRight size={14} />
+          </Link>
+        </div>
 
+        {/* Déconnexion */}
+        <div className="mt-4">
           <button
             type="button"
             onClick={handleSignOut}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50/50 py-3 text-xs font-semibold text-red-600 transition hover:bg-red-100/50"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50/60 py-3.5 text-xs font-semibold text-red-600 transition hover:bg-red-100/60"
           >
             <LogOut size={16} />
             <span>Se déconnecter</span>

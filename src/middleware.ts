@@ -95,19 +95,15 @@ export function middleware(request: NextRequest) {
     });
   }
 
-  // Récupération des jetons de session et de rôle
+  // Récupération sécurisée des jetons de session et de rôle
   const roleCookie = request.cookies.get("up_role")?.value;
   const adminSessionCookie = request.cookies.get("up_admin_session")?.value;
-  const roleParam = request.nextUrl.searchParams.get("role");
-  const adminKey = request.nextUrl.searchParams.get("admin_key");
 
-  const effectiveRole = roleParam || roleCookie;
+  // Rôle effectif issu exclusivement du cookie de session (jamais d'un paramètre URL contournable)
+  const effectiveRole = roleCookie;
 
   // L'administrateur officiel est vérifié côté serveur par up_admin_session
-  const isAdmin =
-    adminSessionCookie === "true" ||
-    adminKey === "up_gabon_admin_secure" ||
-    adminKey === "UP2026";
+  const isAdmin = adminSessionCookie === "true";
 
   // =========================================================================
   // 1. PROTECTION DES ROUTES ADMIN (/dashboard/admin/*)
