@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     // 2. Vérifier si le profil existe déjà
     const { data: existingProfile } = await admin
       .from("profiles")
-      .select("id, role, kyc_status")
+      .select("id, role, kyc_status, full_name")
       .eq("id", userId)
       .maybeSingle();
 

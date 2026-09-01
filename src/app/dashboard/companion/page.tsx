@@ -433,6 +433,7 @@ export default function CompanionDashboardPage() {
       {/* ===================================================================
           2. SECTION RADAR DES DEMANDES EN DIRECT
           =================================================================== */}
+      <section className="space-y-4">
         {/* Titre & Compteur */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
