@@ -77,10 +77,13 @@ export function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
     } catch {
       // ignore
     }
-    document.cookie = "up_role=; path=/; max-age=0";
-    document.cookie = "up_admin_session=; path=/; max-age=0";
-    router.push("/");
+    document.cookie = "up_role=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "up_admin_session=; path=/; max-age=0; SameSite=Lax";
+    setRole("client");
+    setUserEmail(null);
+    setUserFullName(null);
     onClose();
+    window.location.href = "/";
   };
 
   const handleSecretLogoClick = () => {

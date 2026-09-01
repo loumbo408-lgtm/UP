@@ -83,42 +83,33 @@ export function Header() {
               <button
                 type="button"
                 onClick={() => setIsDrawerOpen(true)}
-                className="flex items-center gap-2 rounded-full border border-[#F0E6F3] bg-white px-4 py-2 text-xs font-semibold text-[#1D0F24] shadow-xs transition hover:border-up-300 hover:text-up-700"
+                className="flex items-center gap-2 rounded-full border border-up-200 bg-up-50/70 px-3.5 sm:px-4 py-2 text-xs font-semibold text-up-700 shadow-xs transition hover:border-up-400 hover:bg-up-100 active:scale-95"
                 aria-label="Ouvrir le menu utilisateur"
               >
-                <span className="grid h-6 w-6 place-items-center rounded-full bg-up-50 text-up-600">
+                <span className="grid h-6 w-6 place-items-center rounded-full bg-up-500 text-white">
                   <User size={13} />
                 </span>
                 <span className="hidden sm:inline">Mon Espace</span>
+                <Menu size={16} className="text-up-700" />
               </button>
             ) : (
               <div className="flex items-center gap-2">
                 <Link
                   href="/auth/login"
-                  className="inline-flex items-center gap-1.5 rounded-full border border-[#F0E6F3] bg-white px-4 py-2 text-xs font-semibold text-[#1D0F24] shadow-xs transition hover:border-up-300 hover:text-up-700 hover:bg-up-50/50"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#F0E6F3] bg-white px-3.5 py-2 text-xs font-semibold text-[#1D0F24] shadow-xs transition hover:border-up-300 hover:text-up-700 hover:bg-up-50/50"
                 >
                   <LogIn size={13} className="text-up-600" />
                   <span>Se connecter</span>
                 </Link>
                 <Link
                   href="/auth/signup?role=companion"
-                  className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-up-500 text-white hover:bg-up-600 shadow-md shadow-up-500/20 active:scale-[0.98] px-4 py-2 text-xs font-bold transition"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-up-500 text-white hover:bg-up-600 shadow-md shadow-up-500/20 active:scale-[0.98] px-3.5 py-2 text-xs font-bold transition"
                 >
                   <Sparkles size={13} />
-                  <span>Devenir prestataire</span>
+                  <span>S&apos;inscrire</span>
                 </Link>
               </div>
             )}
-
-            {/* Mobile Hamburger Drawer Trigger en Violet */}
-            <button
-              type="button"
-              onClick={() => setIsDrawerOpen(true)}
-              className="grid h-10 w-10 place-items-center rounded-full border border-[#F0E6F3] bg-white text-up-700 shadow-xs transition hover:bg-up-50 md:hidden"
-              aria-label="Menu principal"
-            >
-              <Menu size={18} />
-            </button>
           </div>
         </div>
       </header>
