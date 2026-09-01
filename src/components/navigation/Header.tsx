@@ -21,6 +21,13 @@ export function Header() {
     if (next >= 3) {
       router.push("/dashboard/admin/login");
       setLogoClicks(0);
+      return;
+    }
+
+    if (isAuthenticated) {
+      router.push("/explore");
+    } else {
+      router.push("/");
     }
   };
 

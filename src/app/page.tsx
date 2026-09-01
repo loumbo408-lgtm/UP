@@ -1,7 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import {
   ArrowRight,
   Briefcase,
@@ -20,6 +22,24 @@ import {
 import { AppShell } from "@/components/layout/AppShell";
 
 export default function LandingPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    async function checkAuthAndRedirect() {
+      try {
+        const supabase = createClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session) {
+          router.replace("/explore");
+        }
+      } catch {
+        // ignore
+      }
+    }
+    checkAuthAndRedirect();
+  }, [router]);
   const activeZones = [
     {
       name: "Libreville",

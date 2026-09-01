@@ -116,6 +116,36 @@ export default function CompanionDetailPage({
     setIsSubmitting(true);
 
     try {
+      // 1. Persistance réelle dans la base de données PostgreSQL (table missions)
+      let dbMissionId = null;
+      try {
+        const res = await fetch("/api/missions/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            companionId: companion.id,
+            date,
+            time,
+            durationHours,
+            venueName: selectedVenue.name,
+            venueAddress: selectedVenue.address,
+            serviceCategory: selectedService,
+            companionFee,
+            platformFee,
+            notes,
+          }),
+        });
+        const data = await res.json();
+        if (res.ok && data.missionId) {
+          dbMissionId = data.missionId;
+        }
+      } catch (apiErr) {
+        console.warn("Missions API create warning:", apiErr);
+      }
+
+      // 2. Enregistrement synchrone dans le store pour affichage instantané
       const newId = addReservation({
         companionId: companion.id,
         companionName: companion.name,
@@ -134,7 +164,7 @@ export default function CompanionDetailPage({
         notes: notes,
       });
 
-      setCreatedReservationId(newId);
+      setCreatedReservationId(dbMissionId || newId);
       setIsSuccessModalOpen(true);
     } catch (err) {
       console.error("Booking error:", err);

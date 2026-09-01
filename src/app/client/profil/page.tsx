@@ -140,7 +140,6 @@ export default function ClientProfilPage() {
     setStatusMessage(null);
 
     try {
-      const supabase = createClient();
       const rawPhone = phone.trim();
       let formattedPhone: string | null = null;
       if (rawPhone.length > 0) {
@@ -149,18 +148,21 @@ export default function ClientProfilPage() {
           : `+241${rawPhone.replace(/^0/, "")}`;
       }
 
-      // Utilisation stricte de .update() pour ne pas toucher au rôle ni violer le trigger guard_profile_privileged_columns
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          full_name: fullName.trim(),
+      const res = await fetch("/api/user/profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
           phone: formattedPhone,
-          avatar_url: avatarUrl || null,
-        })
-        .eq("id", userId);
+          avatarUrl: avatarUrl || null,
+        }),
+      });
 
-      if (error) {
-        throw error;
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Erreur lors de l'enregistrement du profil.");
       }
 
       setStatusMessage({

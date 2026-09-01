@@ -208,7 +208,6 @@ export default function PrestataireProfilPage() {
     setStatusMessage(null);
 
     try {
-      const supabase = createClient();
       const rawPhone = phone.trim();
       let formattedPhone: string | null = null;
       if (rawPhone.length > 0) {
@@ -217,38 +216,34 @@ export default function PrestataireProfilPage() {
           : `+241${rawPhone.replace(/^0/, "")}`;
       }
 
-      // 1. Update profiles table via .update() to respect role isolation & triggers
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({
-          full_name: fullName.trim(),
+      const res = await fetch("/api/user/profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
           phone: formattedPhone,
-          avatar_url: avatarUrl || null,
-        })
-        .eq("id", userId);
-
-      if (profileError) throw profileError;
-
-      // 2. Update companion_details table
-      const { error: detailsError } = await supabase
-        .from("companion_details")
-        .upsert({
-          companion_id: userId,
+          avatarUrl: avatarUrl || null,
           bio: bio.trim(),
-          education_level: educationLevel.trim(),
-          hourly_rate_xaf: hourlyRate,
-          evening_rate_xaf: eveningRate,
-          services_offered: selectedServices,
+          educationLevel: educationLevel.trim(),
+          hourlyRate: Number(hourlyRate),
+          eveningRate: Number(eveningRate),
+          servicesOffered: selectedServices,
           languages: selectedLanguages,
-          zone_preference: selectedZone,
-          is_online: isOnline,
-        });
+          zonePreference: selectedZone,
+          isOnline: isOnline,
+        }),
+      });
 
-      if (detailsError) throw detailsError;
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Erreur lors de l'enregistrement du profil.");
+      }
 
       setStatusMessage({
         type: "success",
-        text: "Profil, tarifs et disponibilités enregistrés avec succès !",
+        text: "Profil, tarifs et disponibilités enregistrés avec succès ! Votre profil est actif et visible sur Explore.",
       });
     } catch (err: any) {
       setStatusMessage({

@@ -46,8 +46,7 @@ export async function fetchVerifiedCompanions(filters?: {
           rating_count
         )
       `)
-      .eq("role", "companion")
-      .eq("kyc_status", "verified");
+      .eq("role", "companion");
 
     const { data, error } = await query;
 

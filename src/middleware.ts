@@ -59,51 +59,44 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // =========================================================================
-  // 0. APPLICATION DU RATE LIMITING
+  // 0. REDIRECTION DE LA LANDING PAGE POUR LES UTILISATEURS CONNECTÉS
   // =========================================================================
-  sweepRateStore();
-  const ip = getClientIp(request);
-  const isAdminApi = pathname.startsWith("/api/admin");
-  const bucket = isAdminApi ? "admin" : "default";
-  const limit = isAdminApi ? RATE_LIMITS.admin : RATE_LIMITS.default;
-  const rate = checkRateLimit(`${bucket}:${ip}`, limit);
+  const roleCookie = request.cookies.get("up_role")?.value;
+  const adminSessionCookie = request.cookies.get("up_admin_session")?.value;
+  const isAdmin = adminSessionCookie === "true";
+  const effectiveRole = roleCookie;
 
-  if (!rate.ok) {
-    if (isAdminApi) {
+  if (pathname === "/") {
+    if (effectiveRole || isAdmin) {
+      return NextResponse.redirect(new URL("/explore", request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // =========================================================================
+  // 0. APPLICATION DU RATE LIMITING (SUR LES ROUTES SENSIBLES ADMIN)
+  // =========================================================================
+  const isAdminApi = pathname.startsWith("/api/admin");
+  if (isAdminApi) {
+    sweepRateStore();
+    const ip = getClientIp(request);
+    const rate = checkRateLimit(`admin:${ip}`, RATE_LIMITS.admin);
+    if (!rate.ok) {
       return NextResponse.json(
         {
-          error:
-            "Trop de tentatives. Veuillez patienter avant de réessayer.",
+          error: "Trop de tentatives. Veuillez patienter avant de réessayer.",
         },
         {
           status: 429,
           headers: {
             "Retry-After": String(rate.retryAfter),
-            "X-RateLimit-Limit": String(limit.max),
+            "X-RateLimit-Limit": String(RATE_LIMITS.admin.max),
             "X-RateLimit-Remaining": "0",
           },
         },
       );
     }
-    return new NextResponse("Trop de requêtes. Réessayez dans un instant.", {
-      status: 429,
-      headers: {
-        "Retry-After": String(rate.retryAfter),
-        "X-RateLimit-Limit": String(limit.max),
-        "X-RateLimit-Remaining": "0",
-      },
-    });
   }
-
-  // Récupération sécurisée des jetons de session et de rôle
-  const roleCookie = request.cookies.get("up_role")?.value;
-  const adminSessionCookie = request.cookies.get("up_admin_session")?.value;
-
-  // Rôle effectif issu exclusivement du cookie de session (jamais d'un paramètre URL contournable)
-  const effectiveRole = roleCookie;
-
-  // L'administrateur officiel est vérifié côté serveur par up_admin_session
-  const isAdmin = adminSessionCookie === "true";
 
   // =========================================================================
   // 1. PROTECTION DES ROUTES ADMIN (/dashboard/admin/*)
@@ -191,6 +184,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/",
     "/dashboard/admin/:path*",
     "/dashboard/companion/:path*",
     "/prestataire/:path*",
