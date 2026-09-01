@@ -10,6 +10,7 @@ import {
   Lock,
   LogOut,
   MessageSquare,
+  Play,
   ShieldCheck,
   Sparkles,
   User,
@@ -32,6 +33,7 @@ export function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
 
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userFullName, setUserFullName] = useState<string | null>(null);
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [logoClicks, setLogoClicks] = useState<number>(0);
 
   useEffect(() => {
@@ -49,15 +51,21 @@ export function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
             user.email?.split("@")[0] ||
             "Membre UP";
           setUserFullName(fullName);
+          if (user.user_metadata?.avatar_url) {
+            setUserAvatar(user.user_metadata.avatar_url);
+          }
 
           const { data: profile } = await supabase
             .from("profiles")
-            .select("full_name")
+            .select("full_name, avatar_url")
             .eq("id", user.id)
             .maybeSingle();
 
           if (profile?.full_name) {
             setUserFullName(profile.full_name);
+          }
+          if (profile?.avatar_url) {
+            setUserAvatar(profile.avatar_url);
           }
         }
       } catch {
@@ -135,13 +143,21 @@ export function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
           {/* User Profile Card */}
           <div className="mt-5 rounded-2xl border border-up-200 bg-up-50 p-4">
             <div className="flex items-center gap-3">
-              <div className="grid h-12 w-12 place-items-center rounded-2xl bg-up-100 text-up-700 font-display text-lg font-bold">
-                {userFullName ? (
-                  userFullName.charAt(0).toUpperCase()
-                ) : (
-                  <User size={20} />
-                )}
-              </div>
+              {userAvatar ? (
+                <img
+                  src={userAvatar}
+                  alt={userFullName || "Avatar"}
+                  className="h-12 w-12 rounded-2xl object-cover border border-up-200 shadow-xs"
+                />
+              ) : (
+                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-up-100 text-up-700 font-display text-lg font-bold">
+                  {userFullName ? (
+                    userFullName.charAt(0).toUpperCase()
+                  ) : (
+                    <User size={20} />
+                  )}
+                </div>
+              )}
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold text-[#1D0F24]">
                   {userFullName || "Compte Membre UP"}
@@ -365,8 +381,20 @@ export function UserDrawer({ isOpen, onClose }: UserDrawerProps) {
           </div>
         </div>
 
-        {/* Footer actions avec Bouton Caché Admin */}
+        {/* Footer actions avec Bouton Intro Cinématique & Bouton Caché Admin */}
         <div className="border-t border-[#F0E6F3] pt-4 space-y-3">
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              window.dispatchEvent(new CustomEvent("open-cinematic-intro"));
+            }}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-up-200 bg-up-50/80 py-2.5 text-xs font-bold text-up-700 transition hover:bg-up-100 hover:border-up-300 shadow-xs"
+          >
+            <Play size={13} className="fill-current text-up-600" />
+            <span>Introduction Cinématographique</span>
+          </button>
+
           <button
             type="button"
             onClick={handleSignOut}

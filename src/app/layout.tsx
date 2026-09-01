@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Inter, Playfair_Display } from "next/font/google";
 import { NetworkStatusBanner } from "@/components/network-status-banner";
+import { CinematicIntro } from "@/components/cinematic/CinematicIntro";
 import "./globals.css";
 
 const inter = Inter({
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className="min-h-dvh bg-[#FAF9FB] font-sans text-[#1D0F24] antialiased select-none selection:bg-up-100 selection:text-up-900">
+        <CinematicIntro />
         <NetworkStatusBanner />
         <div className="min-h-dvh flex flex-col w-full bg-[#FAF9FB]">
           {children}

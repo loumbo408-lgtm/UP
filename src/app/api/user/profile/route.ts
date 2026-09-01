@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     // 2. Vérifier si le profil existe déjà
     const { data: existingProfile } = await admin
       .from("profiles")
-      .select("id, role, kyc_status, full_name")
+      .select("id, role, kyc_status, full_name, avatar_url")
       .eq("id", userId)
       .maybeSingle();
 
@@ -50,6 +50,11 @@ export async function POST(request: Request) {
       : existingProfile?.role || user.user_metadata?.role || "companion";
 
     // 3. Mettre à jour ou insérer le profil dans `profiles`
+    const finalAvatarUrl =
+      avatarUrl !== undefined && avatarUrl !== null && avatarUrl.trim() !== ""
+        ? avatarUrl
+        : (existingProfile?.avatar_url || user.user_metadata?.avatar_url || null);
+
     const { data: updatedProfile, error: profileErr } = await admin
       .from("profiles")
       .upsert({
@@ -57,7 +62,7 @@ export async function POST(request: Request) {
         role: userRole,
         full_name: fullName !== undefined ? fullName.trim() : (existingProfile?.full_name || user.user_metadata?.full_name || "Membre UP"),
         phone: phone !== undefined ? phone : null,
-        avatar_url: avatarUrl !== undefined ? avatarUrl : null,
+        avatar_url: finalAvatarUrl,
         kyc_status: "verified", // Tout profil complété/actif est validé pour apparaître sur Explore
       })
       .select()

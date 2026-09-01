@@ -33,6 +33,7 @@ export default function ClientProfilPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -71,6 +72,7 @@ export default function ClientProfilPage() {
             setPhone(profile.phone || user.user_metadata?.phone || "");
             setAvatarUrl(
               profile.avatar_url ||
+                user.user_metadata?.avatar_url ||
                 "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop",
             );
             setKycStatus(profile.kyc_status || "pending");
@@ -89,7 +91,7 @@ export default function ClientProfilPage() {
     loadUserProfile();
   }, []);
 
-  // Handle Photo Upload
+  // Handle Photo Upload avec Sauvegarde Instantanée
   const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -103,25 +105,41 @@ export default function ClientProfilPage() {
     }
 
     try {
+      setIsUploadingPhoto(true);
       setStatusMessage({
         type: "success",
-        text: "Optimisation de l'image en cours...",
+        text: "Optimisation de l'image et sauvegarde instantanée...",
       });
       const compressed = await compressImageFile(file, {
-        maxWidth: 400,
-        maxHeight: 400,
-        quality: 0.85,
+        maxWidth: 360,
+        maxHeight: 360,
+        quality: 0.82,
       });
       setAvatarUrl(compressed);
+
+      // Sauvegarde immédiate en direct via l'API dédiée
+      const res = await fetch("/api/user/avatar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl: compressed }),
+      });
+
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error || "Échec de l'enregistrement de l'avatar.");
+      }
+
       setStatusMessage({
         type: "success",
-        text: "Photo prête et optimisée. Cliquez sur 'Enregistrer' pour sauvegarder.",
+        text: "✓ Photo de profil enregistrée en direct et synchronisée avec succès !",
       });
     } catch (err: any) {
       setStatusMessage({
         type: "error",
         text: err?.message || "Erreur lors du traitement de la photo.",
       });
+    } finally {
+      setIsUploadingPhoto(false);
     }
   };
 
@@ -255,11 +273,21 @@ export default function ClientProfilPage() {
             <div className="mt-4 flex items-center justify-center gap-3">
               <button
                 type="button"
+                disabled={isUploadingPhoto}
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-1.5 rounded-full border border-up-200 bg-up-50 px-4 py-2 text-xs font-semibold text-up-700 transition hover:bg-up-100"
+                className="flex items-center gap-1.5 rounded-full border border-up-200 bg-up-50 px-4 py-2 text-xs font-semibold text-up-700 transition hover:bg-up-100 disabled:opacity-50"
               >
-                <Camera size={14} />
-                <span>Changer la photo</span>
+                {isUploadingPhoto ? (
+                  <>
+                    <span className="h-3.5 w-3.5 border-2 border-up-700 border-t-transparent rounded-full animate-spin" />
+                    <span>Enregistrement direct...</span>
+                  </>
+                ) : (
+                  <>
+                    <Camera size={14} />
+                    <span>Changer la photo</span>
+                  </>
+                )}
               </button>
             </div>
             <p className="mt-2 text-[10px] text-[#6B5D73]">
