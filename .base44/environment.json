@@ -1,0 +1,31 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    {
+      "name": "SUPABASE_SERVICE_ROLE_KEY",
+      "description": "Supabase service_role key — from Supabase dashboard → Settings → API → service_role. Needed for admin API routes.",
+      "requiredAtBoot": false,
+      "generatedForDevelopment": true
+    },
+    {
+      "name": "SUPABASE_SECRET_KEY",
+      "description": "Alternative name for the Supabase secret key. Same value as SUPABASE_SERVICE_ROLE_KEY.",
+      "requiredAtBoot": false,
+      "generatedForDevelopment": true
+    },
+    {
+      "name": "PSP_API_KEY",
+      "description": "Mobile Money gateway API key (Airtel Money / Moov Money) for payment escrow.",
+      "requiredAtBoot": false,
+      "generatedForDevelopment": true
+    },
+    {
+      "name": "UP_ADMIN_SECURITY_KEY",
+      "description": "Admin security key for the /api/admin/auth endpoint. Defaults to 'UP2026' in code.",
+      "requiredAtBoot": false,
+      "generatedForDevelopment": true
+    }
+  ]
+}

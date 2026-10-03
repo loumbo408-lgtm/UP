@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["3000-" + (process.env.BASE44_PUBLIC_HOST_SUFFIX || "localhost")],
   images: {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [320, 420, 640, 750, 828, 1080, 1200],
